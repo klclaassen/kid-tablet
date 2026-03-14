@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Coloring Pages</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:#0f1535;
+      color:white;
+      padding:18px;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .title{
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .btn{
+      border:0;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+      background:rgba(255,255,255,0.18);
+      color:#fff;
+    }
+
+    .btn-primary{
+      background:#ffd54f;
+      color:#222;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:14px;
+    }
+
+    .card{
+      background:rgba(255,255,255,0.10);
+      border-radius:16px;
+      padding:10px;
+      text-align:center;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .card img{
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      border-radius:10px;
+      margin-bottom:8px;
+      display:block;
+    }
+
+    .badge{
+      font-size:12px;
+      margin-top:4px;
+      opacity:0.9;
+      font-weight:900;
+    }
+
+    .empty{
+      background:rgba(255,255,255,0.10);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:14px;
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .artStage{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      gap:16px;
+      margin-top:18px;
+      flex-wrap:wrap;
+    }
+
+    .canvasWrap{
+      position:relative;
+      width:720px;
+      height:720px;
+      border-radius:18px;
+      overflow:hidden;
+      background:#ccc;
+      box-shadow:0 2px 12px rgba(0,0,0,0.18);
+      flex:0 0 auto;
+    }
+
+    #lineArtImg,
+    #draw{
+      position:absolute;
+      left:0;
+      top:0;
+      width:720px;
+      height:720px;
+      border-radius:18px;
+    }
+
+    #lineArtImg{
+      z-index:1;
+      object-fit:contain;
+      pointer-events:none;
+      background:transparent;
+      filter:none;
+    }
+
+    #draw{
+      z-index:2;
+      touch-action:none;
+      background:transparent;
+    }
+
+    .sideTools{
+      width:120px;
+      flex:0 0 120px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .toolCard{
+      background:rgba(255,255,255,0.10);
+      border-radius:18px;
+      padding:12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .toolLabel{
+      font-size:13px;
+      font-weight:900;
+      opacity:0.95;
+      margin-bottom:10px;
+      text-align:center;
+    }
+
+    .sizeButtons{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+    }
+
+    .sizeBtn{
+      width:68px;
+      height:68px;
+      border-radius:18px;
+      border:0;
+      cursor:pointer;
+      background:rgba(255,255,255,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
+    }
+
+    .sizeBtnDot{
+      display:block;
+      border-radius:999px;
+      background:#fff;
+    }
+
+    .sizeBtn.selected{
+      background:rgba(255,255,255,0.32);
+      box-shadow:
+        0 6px 14px rgba(0,0,0,0.22),
+        inset 0 0 0 3px rgba(255,255,255,0.32);
+    }
+
+    .palette{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+      margin-top:12px;
+    }
+
+    .swatch{
+      width:70px;
+      height:54px;
+      border-radius:14px;
+      cursor:pointer;
+      border:0;
+    }
+
+    .swatch.selected{
+      outline:4px solid rgba(255,255,255,0.85);
+      outline-offset:3px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn.selected{
+      background:rgba(255,255,255,0.32);
+      box-shadow:
+        0 6px 14px rgba(0,0,0,0.22),
+        inset 0 0 0 3px rgba(255,255,255,0.32);
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    @media (max-width: 980px){
+      .canvasWrap{
+        width:min(92vw, 720px);
+        height:min(92vw, 720px);
+      }
+
+      #lineArtImg,
+      #draw{
+        width:100%;
+        height:100%;
+      }
+
+      .sideTools{
+        width:100%;
+        flex:1 1 100%;
+        align-items:center;
+      }
+
+      .toolCard{
+        width:min(420px, 100%);
+      }
+
+      .sizeButtons{
+        flex-direction:row;
+        justify-content:center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="libraryView">
+    <div class="top">
+      <div class="title">🎨 Coloring</div>
+      <button class="btn" onclick="location.href='workstation.html'">Back</button>
+    </div>
+
+    <div class="empty" id="emptyState" style="display:none;">
+      No coloring pages yet!<br>
+      Tap “Shop for more” to buy your first page ⭐
+    </div>
+
+    <div id="pageGrid" class="grid"></div>
+
+    <div class="row" style="margin-top:16px;">
+      <button class="btn btn-primary" id="shopMore">Shop for more ⭐</button>
+    </div>
+  </div>
+
+  <div id="colorView" class="hidden">
+    <div class="top">
+      <div class="title" id="pageTitle">Coloring</div>
+      <button class="btn" id="backToLibrary">Back</button>
+    </div>
+
+    <div class="artStage">
+      <div class="canvasWrap">
+        <img id="lineArtImg" alt="Coloring page">
+        <canvas id="draw" width="720" height="720"></canvas>
+      </div>
+
+      <div class="sideTools">
+        <div class="toolCard">
+          <div class="toolLabel">Brush size</div>
+          <div class="sizeButtons" id="sizeButtons">
+            <button class="sizeBtn" data-size="9" aria-label="Small brush">
+              <span class="sizeBtnDot" style="width:8px;height:8px;"></span>
+            </button>
+            <button class="sizeBtn" data-size="15" aria-label="Medium brush">
+              <span class="sizeBtnDot" style="width:14px;height:14px;"></span>
+            </button>
+            <button class="sizeBtn selected" data-size="22" aria-label="Large brush">
+              <span class="sizeBtnDot" style="width:20px;height:20px;"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="palette" id="palette"></div>
+
+    <div class="row">
+      <button class="btn" id="eraser">Eraser</button>
+      <button class="btn" id="clear">Clear</button>
+    </div>
+  </div>
+
+<script>
+  const SHOP_KEY = "addy_ws_shop_v1";
+
+  const PAGES = [
+    { id:"page_boy1", name:"Boy", img:"pages/boy1.png", cost:3 },
+    { id:"page_dino1", name:"Dinosaur", img:"pages/dino1.png", cost:3 },
+    { id:"page_icecreamtruck", name:"Ice Cream Truck", img:"pages/icecreamtruck.png", cost:3 },
+    { id:"page_octopus", name:"Octopus", img:"pages/octopus.png", cost:3 },
+    { id:"page_truck1", name:"Truck", img:"pages/truck1.png", cost:3 },
+    { id:"page_turtle", name:"Turtle", img:"pages/turtle.png", cost:3 }
+  ];
+
+  function loadJSON(key, fallback){
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function isPurchased(id){
+    const s = loadJSON(SHOP_KEY, { purchased:{} });
+    return !!(s.purchased && s.purchased[id]);
+  }
+
+  function purchasedPages(){
+    return PAGES.filter(p => isPurchased(p.id));
+  }
+
+  const libraryView = document.getElementById("libraryView");
+  const colorView   = document.getElementById("colorView");
+  const grid        = document.getElementById("pageGrid");
+  const emptyState  = document.getElementById("emptyState");
+
+  const draw = document.getElementById("draw");
+  const dctx = draw.getContext("2d");
+  const lineArtImg = document.getElementById("lineArtImg");
+
+  const eraserBtn = document.getElementById("eraser");
+  const clearBtn  = document.getElementById("clear");
+  const pal       = document.getElementById("palette");
+
+  document.getElementById("shopMore").onclick = () => {
+    location.href = "shop.html";
+  };
+
+  function buildGrid(){
+    const owned = purchasedPages();
+    grid.innerHTML = "";
+
+    emptyState.style.display = owned.length ? "none" : "block";
+
+    owned.forEach(page => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="${page.img}" alt="${page.name}">
+        <div>${page.name}</div>
+        <div class="badge">⭐ Purchased</div>
+      `;
+      card.onclick = () => openPage(page);
+      grid.appendChild(card);
+    });
+  }
+
+  const COLORS = [
+    "#ff1744",
+    "#ff9100",
+    "#ffea00",
+    "#00e676",
+    "#2979ff",
+    "#b388ff",
+    "#8d6e63",
+    "#212121"
+  ];
+
+  let currentColor = COLORS[0];
+  let currentLineWidth = 22;
+  let erasing = false;
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let firstSwatchBtn = null;
+
+  function setEraser(on){
+    erasing = on;
+    eraserBtn.classList.toggle("selected", erasing);
+  }
+
+  function selectSwatch(buttonEl){
+    document.querySelectorAll(".swatch").forEach(b => b.classList.remove("selected"));
+    if (buttonEl) buttonEl.classList.add("selected");
+  }
+
+  function selectSizeButton(buttonEl){
+    document.querySelectorAll(".sizeBtn").forEach(b => b.classList.remove("selected"));
+    if (buttonEl) buttonEl.classList.add("selected");
+  }
+
+  function openPage(page){
+    libraryView.classList.add("hidden");
+    colorView.classList.remove("hidden");
+    document.getElementById("pageTitle").textContent = page.name;
+
+    lineArtImg.src = page.img;
+
+    dctx.clearRect(0, 0, draw.width, draw.height);
+    dctx.globalCompositeOperation = "source-over";
+    setEraser(false);
+    currentColor = COLORS[0];
+    currentLineWidth = 22;
+    selectSwatch(firstSwatchBtn);
+    selectSizeButton(document.querySelector('.sizeBtn[data-size="22"]'));
+  }
+
+  function showLibrary(){
+    colorView.classList.add("hidden");
+    libraryView.classList.remove("hidden");
+
+    dctx.clearRect(0, 0, draw.width, draw.height);
+    lineArtImg.removeAttribute("src");
+    setEraser(false);
+    buildGrid();
+  }
+
+  document.getElementById("backToLibrary").onclick = showLibrary;
+
+  COLORS.forEach((hex, idx) => {
+    const b = document.createElement("button");
+    b.className = "swatch";
+    b.style.background = hex;
+    b.style.boxShadow = "0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 3px rgba(255,255,255,0.22)";
+    b.onclick = () => {
+      currentColor = hex;
+      setEraser(false);
+      selectSwatch(b);
+    };
+    pal.appendChild(b);
+
+    if (idx === 0) firstSwatchBtn = b;
+  });
+
+  selectSwatch(firstSwatchBtn);
+
+  document.querySelectorAll(".sizeBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentLineWidth = Number(btn.dataset.size);
+      selectSizeButton(btn);
+    });
+  });
+
+  function xy(e){
+    const r = draw.getBoundingClientRect();
+    const scaleX = draw.width / r.width;
+    const scaleY = draw.height / r.height;
+
+    if (e.touches && e.touches.length){
+      return [
+        (e.touches[0].clientX - r.left) * scaleX,
+        (e.touches[0].clientY - r.top) * scaleY
+      ];
+    }
+
+    return [
+      (e.clientX - r.left) * scaleX,
+      (e.clientY - r.top) * scaleY
+    ];
+  }
+
+  function start(e){
+    e.preventDefault();
+    drawing = true;
+    [lastX, lastY] = xy(e);
+  }
+
+  function move(e){
+    if (!drawing) return;
+    e.preventDefault();
+
+    const [x, y] = xy(e);
+
+    dctx.save();
+    dctx.lineWidth = currentLineWidth;
+    dctx.lineCap = "round";
+    dctx.lineJoin = "round";
+    dctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+    dctx.strokeStyle = erasing ? "rgba(0,0,0,1)" : currentColor;
+
+    dctx.beginPath();
+    dctx.moveTo(lastX, lastY);
+    dctx.lineTo(x, y);
+    dctx.stroke();
+    dctx.restore();
+
+    [lastX, lastY] = [x, y];
+  }
+
+  function end(){
+    drawing = false;
+  }
+
+  draw.addEventListener("mousedown", start);
+  draw.addEventListener("mousemove", move);
+  draw.addEventListener("mouseup", end);
+  draw.addEventListener("mouseleave", end);
+
+  draw.addEventListener("touchstart", start, { passive:false });
+  draw.addEventListener("touchmove", move, { passive:false });
+  draw.addEventListener("touchend", end);
+  draw.addEventListener("touchcancel", end);
+
+  eraserBtn.onclick = () => {
+    setEraser(true);
+    selectSwatch(null);
+  };
+
+  clearBtn.onclick = () => {
+    dctx.clearRect(0, 0, draw.width, draw.height);
+    dctx.globalCompositeOperation = "source-over";
+    setEraser(false);
+    currentColor = COLORS[0];
+    currentLineWidth = 22;
+    selectSwatch(firstSwatchBtn);
+    selectSizeButton(document.querySelector('.sizeBtn[data-size="22"]'));
+  };
+
+  lineArtImg.onerror = () => {
+    console.error("Failed to load full-size coloring image:", lineArtImg.src);
+  };
+
+  lineArtImg.onload = () => {
+    console.log("Loaded full-size coloring image:", lineArtImg.src);
+  };
+
+  buildGrid();
+</script>
+
+</body>
+</html>
