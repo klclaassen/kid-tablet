@@ -1,0 +1,72 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Addy</title>
+
+  <!-- PWA stuff -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f2550">
+  <link rel="apple-touch-icon" href="icons/app_1.png">
+
+  <!-- Optional but nice -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Redirect -->
+  <meta http-equiv="refresh" content="0; url=workstation.html">
+
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:Arial, sans-serif;
+      background:#1f2550;
+      color:white;
+    }
+
+    .loading{
+      text-align:center;
+      font-weight:900;
+      font-size:28px;
+    }
+
+    .sub{
+      margin-top:10px;
+      opacity:0.8;
+      font-size:16px;
+    }
+  </style>
+</head>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("Service worker registration failed:", err));
+    });
+  }
+</script>
+
+<body>
+
+<div class="loading">
+  🚀 Launching Addy Workstation
+  <div class="sub">If nothing happens, tap below</div>
+  <div style="margin-top:14px;">
+    <a href="workstation.html" style="color:#ffd54f;font-weight:900;">
+      Open Workstation
+    </a>
+  </div>
+</div>
+
+<script>
+/* JS fallback redirect */
+window.location.replace("workstation.html");
+</script>
+
+</body>
+</html>

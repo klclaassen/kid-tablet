@@ -1,0 +1,16 @@
+{
+  "name": "Addy App",
+  "short_name": "Addy",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#2d1b69",
+  "theme_color": "#2d1b69",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/app_1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

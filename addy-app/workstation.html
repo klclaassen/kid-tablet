@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Addy Workstation</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2d1b69">
+  <link rel="apple-touch-icon" href="icons/app_1.png">
+
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("Service worker registration failed:", err));
+    });
+  }
+</script>
+
+<body>
+  <!-- Reward overlay -->
+  <div class="reward-overlay" id="rewardOverlay" aria-hidden="true">
+    <div class="reward-card">
+      <div class="reward-emoji" id="rewardEmoji">🎉</div>
+      <div class="reward-title" id="rewardTitle">Bonus!</div>
+      <div class="reward-sub" id="rewardSub">You earned a reward!</div>
+      <button class="btn-soft" id="rewardClose">OK</button>
+    </div>
+  </div>
+
+  <!-- Home -->
+  <div class="screen active" id="homeScreen">
+    <div class="home-wrap">
+      <div class="home-title">Addy Workstation</div>
+      <div class="home-sub">Pick an activity ✨</div>
+      <button class="btn-patterns" id="goMenu">✏️ Learning</button>
+      <button class="btn-patterns" id="btnColoring">🎨 Coloring</button>
+      <button class="btn-patterns" id="openSettings">⚙️ Settings</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="reward-overlay" id="settingsOverlay" aria-hidden="true">
+    <div class="reward-card">
+      <div class="reward-title" style="margin-top:6px;">Settings</div>
+      <div class="reward-sub">grown-up buttons</div>
+
+      <div class="sub-actions" style="margin-top:10px;">
+        <button class="btn-soft" id="settingsAnalytics">Analytics</button>
+        <button class="btn-soft" id="settingsReset">Reset Stars</button>
+        <button class="btn-soft" id="settingsLenient">Lenient: OFF</button>
+      </div>
+
+      <div class="sub-actions" style="margin-top:10px;">
+        <button class="btn-soft" id="settingsClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu -->
+  <div class="screen" id="menuScreen">
+    <div class="top-row">
+      <div class="section-title">Learning Menu</div>
+      <button class="btn-back" id="menuBackBtn">Back</button>
+    </div>
+
+    <div class="menu-grid">
+      <button class="btn-letters" id="btnLetters">Letters</button>
+      <button class="btn-numbers" id="btnNumbers">Numbers</button>
+      <button class="btn-name" id="btnName">Name</button>
+      <button class="btn-shapes" id="btnShapes">Shapes</button>
+      <button class="btn-patterns" id="btnPatterns">Patterns</button>
+      <button class="btn-challenges" id="btnChallenges">Challenge Cards</button>
+    </div>
+  </div>
+
+  <!-- Letters -->
+  <div class="screen" id="lettersScreen">
+    <div class="top-row">
+      <div class="section-title">Letters</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="activity-shell">
+      <div class="left-card" style="background: rgba(94,53,177,0.16);">
+        <div class="big-pair">
+          <div class="big-upper" id="lettersUpper">A</div>
+          <div class="big-lower" id="lettersLower">a</div>
+        </div>
+      </div>
+
+      <div class="center-card" style="background: rgba(94,53,177,0.16);">
+        <div class="canvas-wrap">
+          <canvas id="lettersGuide" width="340" height="340" style="background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.14);"></canvas>
+          <canvas id="lettersDraw" class="draw-layer" width="340" height="340"></canvas>
+        </div>
+        <div class="sub-actions">
+          <button class="btn-soft" id="lettersClear">Clear</button>
+          <button class="btn-soft" id="lettersDone">Done ⭐</button>
+        </div>
+        <div class="feedback" id="lettersFeedback"></div>
+      </div>
+
+      <div class="right-card" style="background: rgba(94,53,177,0.16);">
+        <div class="emoji-big" id="lettersEmoji">🍎</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Numbers -->
+  <div class="screen" id="numbersScreen">
+    <div class="top-row">
+      <div class="section-title">Numbers</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="activity-shell">
+      <div class="left-card" style="background: rgba(251,140,0,0.16);">
+        <div class="big-upper active-choice" id="numbersValue">4</div>
+      </div>
+
+      <div class="center-card" style="background: rgba(251,140,0,0.16);">
+        <div class="canvas-wrap">
+          <canvas id="numbersGuide" width="340" height="340" style="background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.14);"></canvas>
+          <canvas id="numbersDraw" class="draw-layer" width="340" height="340"></canvas>
+        </div>
+        <div class="sub-actions">
+          <button class="btn-soft" id="numbersClear">Clear</button>
+          <button class="btn-soft" id="numbersDone">Done ⭐</button>
+        </div>
+        <div class="feedback" id="numbersFeedback"></div>
+      </div>
+
+      <div class="right-card" style="background: rgba(251,140,0,0.16);">
+        <div class="emoji-grid" id="numbersGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Name -->
+  <div class="screen" id="nameScreen">
+    <div class="top-row">
+      <div class="section-title">Name</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="activity-shell">
+      <div class="left-card" style="background: rgba(96,125,139,0.18);">
+        <div class="name-word" id="nameWord"></div>
+      </div>
+
+      <div class="center-card" style="background: rgba(96,125,139,0.18);">
+        <div class="canvas-wrap">
+          <canvas id="nameGuide" width="340" height="340" style="background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.14);"></canvas>
+          <canvas id="nameDraw" class="draw-layer" width="340" height="340"></canvas>
+        </div>
+        <div class="sub-actions">
+          <button class="btn-soft" id="nameClear">Clear</button>
+          <button class="btn-soft" id="nameDone">Done ⭐</button>
+        </div>
+        <div class="feedback" id="nameFeedback"></div>
+      </div>
+
+      <div class="right-card" style="background: rgba(96,125,139,0.18);">
+        <div class="emoji-big">✍️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shapes -->
+  <div class="screen" id="shapesScreen">
+    <div class="top-row">
+      <div class="section-title">Shapes</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="activity-shell">
+      <div class="left-card" style="background: rgba(38,166,154,0.16);">
+        <div class="shape-label" id="shapeLabel">Circle</div>
+      </div>
+
+      <div class="center-card" style="background: rgba(38,166,154,0.16);">
+        <div class="canvas-wrap">
+          <canvas id="shapesGuide" width="340" height="340" style="background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.14);"></canvas>
+          <canvas id="shapesDraw" class="draw-layer" width="340" height="340"></canvas>
+        </div>
+        <div class="sub-actions">
+          <button class="btn-soft" id="shapesClear">Clear</button>
+          <button class="btn-soft" id="shapesDone">Done ⭐</button>
+        </div>
+        <div class="feedback" id="shapesFeedback"></div>
+      </div>
+
+      <div class="right-card" style="background: rgba(38,166,154,0.16);">
+        <div class="shape-preview">
+          <canvas id="shapesPreview" width="260" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patterns -->
+  <div class="screen" id="patternsScreen">
+    <div class="top-row">
+      <div class="section-title">Patterns</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="center-card" style="min-height:520px; background: rgba(236,64,122,0.16);">
+      <div class="pattern-strip" id="patternStrip"></div>
+      <div class="pattern-options" id="patternOptions"></div>
+      <div class="feedback" id="patternFeedback"></div>
+      <div class="sub-actions">
+        <button class="btn-soft" id="newPattern">New Pattern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenges -->
+  <div class="screen" id="challengesScreen">
+    <div class="top-row">
+      <div class="section-title">Challenge Cards</div>
+      <button class="btn-back backToMenu">Back</button>
+    </div>
+
+    <div class="center-card" style="min-height:520px; background: rgba(66,165,245,0.16);">
+      <div class="challenge-card" id="challengeCard"></div>
+      <div class="feedback" id="challengeFeedback"></div>
+      <div class="sub-actions">
+        <button class="btn-soft" id="newChallenge">New Challenge</button>
+        <button class="btn-soft" id="challengeDone">I Did It ⭐</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/workstation.js"></script>
+  <script src="js/boot.js"></script>
+</body>
+</html>

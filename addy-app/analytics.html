@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Addy Workstation</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2d1b69">
+  <link rel="apple-touch-icon" href="icons/app_1.png">
+
+  <link rel="stylesheet" href="css/theme.css" />
+
+  <style>
+    .analyticsWrap{
+      width:min(1100px, 96vw);
+      margin:0 auto;
+    }
+
+    .analyticsCard{
+      background:rgba(255,255,255,0.10);
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .muted{
+      opacity:0.85;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    td, th{
+      padding:8px;
+      border-bottom:1px solid rgba(255,255,255,0.12);
+      text-align:left;
+    }
+
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:rgba(0,0,0,0.25);
+      padding:12px;
+      border-radius:12px;
+    }
+
+    .btn-danger{
+      background:#d32f2f;
+      color:#fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="analyticsWrap">
+    <div class="top-row">
+      <div class="section-title">Workstation Analytics</div>
+      <button class="btn-back" id="backBtn">Back</button>
+    </div>
+
+    <div class="analyticsCard">
+      <div id="summary"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:18px;">Stars by Mode</h2>
+      <div id="byMode"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:18px;">Recent Events</h2>
+      <div class="muted" style="margin-bottom:8px;">Most recent 25</div>
+      <pre id="events"></pre>
+    </div>
+
+    <div class="analyticsCard">
+      <div class="row">
+        <button class="btn-soft" id="refresh">Refresh</button>
+        <button class="btn-soft" id="export">Export JSON</button>
+        <button class="btn-danger" id="reset">Reset ALL (events + progress)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/boot.js"></script>
+
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("Service worker registration failed:", err));
+    });
+  }
+</script>
+  <script>
+    function renderAnalyticsPage() {
+      const p = getProgress();
+      const events = getEvents();
+
+      document.getElementById("summary").innerHTML = `
+        <div style="font-size:20px; font-weight:900;">⭐ Stars: ${p.stars}</div>
+        <div class="muted">Streak: ${p.streakDays} days</div>
+        <div class="muted">Last star day: ${p.lastStarDay || "—"}</div>
+        <div class="muted">Total events stored: ${events.length}</div>
+      `;
+
+      const rows = Object.entries(p.byModeStars || {})
+        .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
+        .join("");
+
+      document.getElementById("byMode").innerHTML =
+        `<table><tr><th>Mode</th><th>Stars</th></tr>${rows}</table>`;
+
+      const recent = events.slice(-25).reverse();
+      document.getElementById("events").textContent =
+        recent.map(e => JSON.stringify(e)).join("\\n");
+    }
+
+    document.getElementById("backBtn").onclick = () => {
+      location.href = "workstation.html";
+    };
+
+    document.getElementById("refresh").onclick = renderAnalyticsPage;
+
+    document.getElementById("export").onclick = () => {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        progress: getProgress(),
+        events: getEvents()
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "workstation_analytics_export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.getElementById("reset").onclick = () => {
+      if (!confirm("This deletes ALL stored events and progress. Continue?")) return;
+      removeJSON(STORAGE_KEYS.events);
+      removeJSON(STORAGE_KEYS.progress);
+      renderAnalyticsPage();
+    };
+
+    renderAnalyticsPage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Addy Workstation</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2d1b69">
+  <link rel="apple-touch-icon" href="icons/app_1.png">
+
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("Service worker registration failed:", err));
+    });
+  }
+</script>
+
+<body>
+  <div class="app">
+    <div class="top">
+      <div class="brand">
+        <span></span>
+        <div class="brandStack">
+          <div class="brandTitle" id="avatarDisplayName">Name</div>
+          <button class="nameEditBtn" id="editNameBtn" type="button">Edit name</button>
+        </div>
+      </div>
+
+      <div class="topRight">
+        <button class="pill" id="backHomeBtn" type="button">Back Home</button>
+      </div>
+    </div>
+
+    <div class="nameEditor hidden" id="nameEditor">
+      <input
+        type="text"
+        id="avatarNameInput"
+        class="nameInput"
+        maxlength="18"
+        placeholder="Enter your name"
+        autocomplete="off"
+      />
+      <button class="btn primary" id="saveNameBtn" type="button">Save</button>
+      <button class="btn" id="cancelNameBtn" type="button">Cancel</button>
+    </div>
+
+    <section class="view active" id="homeView">
+      <div class="hero">
+        <div class="heroGrid">
+          <div>
+            <h1 class="headline">Build your avatar ✨</h1>
+            <p class="sub">
+              Edit your body, pick your clothes, and unlock silly goodies right from your closet.
+            </p>
+            <div class="buttonRow">
+              <button class="btn primary" data-go="style" type="button">Edit Avatar</button>
+              <button class="btn" data-go="closet" type="button">Open Closet</button>
+              <button class="btn" id="earnStarsBtn" type="button">+2 Practice Stars</button>
+            </div>
+          </div>
+
+          <div class="avatarScene">
+            <div class="sparkle a">⭐</div>
+            <div class="sparkle b">✨</div>
+            <div class="sparkle c">💖</div>
+            <div class="sparkle d">🌈</div>
+
+            <div class="avatarWrap" id="avatarPreviewHome"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panelGrid">
+        <div class="card">
+          <div class="tiny">Stars</div>
+          <div class="bigStat" id="starsBig">0</div>
+          <div class="tiny">Use stars to unlock shirts, hats, accessories, and buddies.</div>
+        </div>
+
+        <div class="card">
+          <div class="tiny">Owned items</div>
+          <div class="bigStat" id="ownedBig">0</div>
+          <div class="tiny">Your collection grows every time you practice.</div>
+        </div>
+
+        <div class="card">
+          <div class="tiny">Equipped look</div>
+          <div class="bigStat" id="lookBig">0</div>
+          <div class="tiny">Clothes, accessories, and buddies all count toward your look.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="styleView">
+      <div class="sectionTop">
+        <div>
+          <div class="headline" style="font-size:26px; margin:0;">Edit Avatar</div>
+          <div class="tiny">Switch between body and clothes with big easy buttons.</div>
+        </div>
+        <button class="btn" data-go="home" type="button">Back Home</button>
+      </div>
+
+      <div class="tabs modeTabs" id="styleModeTabs"></div>
+
+      <div class="hero styleHero" style="padding:16px;">
+        <div class="heroGrid styleGrid">
+          <div class="avatarScene">
+            <div class="avatarWrap" id="avatarPreviewStyle"></div>
+          </div>
+
+          <div class="stylePanels">
+            <div class="stylePanel" id="styleBodyPanel">
+              <div class="styleControls">
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Hair style</h3>
+                  <div class="choiceGrid" id="hairStyleChoices"></div>
+                </div>
+
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Hair color</h3>
+                  <div class="swatchGrid" id="hairColorChoices"></div>
+                </div>
+
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Skin color</h3>
+                  <div class="swatchGrid" id="skinColorChoices"></div>
+                </div>
+
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Face</h3>
+                  <div class="choiceGrid" id="expressionChoices"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stylePanel hidden" id="styleClothesPanel">
+              <div class="styleControls">
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Top</h3>
+                  <div class="choiceGrid" id="outfitTypeChoices"></div>
+                </div>
+
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Shirt Color</h3>
+                  <div class="swatchGrid" id="topColorChoices"></div>
+                </div>
+
+                <div class="card styleCard">
+                  <h3 style="margin:0 0 10px;">Pants Color</h3>
+                  <div class="swatchGrid" id="pantsColorChoices"></div>
+                </div>
+
+                <div class="card styleCard helperCard">
+                  <h3 style="margin:0 0 8px;">Closet items</h3>
+                  <div class="tiny" style="margin-bottom:10px;">Shirts, hats, accessories, and buddies live in your closet.</div>
+                  <button class="btn primary helperBtn" data-go="closet" type="button">Open Closet</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="closetView">
+      <div class="sectionTop">
+        <div>
+          <div class="headline" style="font-size:26px; margin:0;">Closet</div>
+          <div class="tiny">Everything is here. Locked items can be unlocked right in this closet.</div>
+        </div>
+        <button class="btn" data-go="home" type="button">Back</button>
+      </div>
+
+      <div class="hero" style="padding:16px;">
+        <div class="heroGrid">
+          <div class="avatarScene">
+            <div class="avatarWrap" id="avatarPreviewCloset"></div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:12px;">
+              <h3 style="margin:0 0 6px;">Current look</h3>
+              <div class="tiny" id="currentLookText">Shirt, hat, accessory, and buddy.</div>
+            </div>
+
+            <div class="tabs" id="closetTabs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="closetGrid" id="closetGrid"></div>
+    </section>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/boot.js"></script>
+</body>
+</html>

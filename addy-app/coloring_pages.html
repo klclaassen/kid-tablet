@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Addy Workstation</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2d1b69">
+  <link rel="apple-touch-icon" href="icons/app_1.png">
+
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.error("Service worker registration failed:", err));
+    });
+  }
+</script>
+
+<body>
+
+<div id="libraryView">
+  <div class="top">
+    <div class="title">🎨 Coloring</div>
+    <button class="btn-back" onclick="location.href='workstation.html'">Back</button>
+  </div>
+
+  <div class="libraryCard">
+    <div class="row starsRow" style="margin-bottom:12px;">
+      <div class="btn-soft" style="cursor:default;">
+        You have <span id="shopStars">0</span> ⭐
+      </div>
+    </div>
+
+    <div class="empty" id="emptyState" style="display:none;">
+      No coloring pages yet!<br>
+      Unlock your first page below ⭐
+    </div>
+
+    <div id="pageGrid" class="grid"></div>
+  </div>
+</div>
+
+<div id="colorView" class="hidden">
+  <div class="top">
+    <div class="title" id="pageTitle">Coloring</div>
+    <button class="btn-back" id="backToLibrary">Back</button>
+  </div>
+
+  <div class="artStage">
+    <div class="canvasWrap">
+      <canvas id="colorLayer" width="1200" height="1200"></canvas>
+      <img id="lineArtImg" alt="Coloring page">
+      <canvas id="previewLayer" width="1200" height="1200"></canvas>
+    </div>
+
+    <div class="sideTools">
+      <div class="toolCard">
+        <div class="toolLabel">Brush size</div>
+        <div class="sizeButtons" id="sizeButtons">
+          <button class="sizeBtn" data-size="9" aria-label="Small brush" type="button">
+            <span class="sizeBtnDot" style="width:8px;height:8px;"></span>
+          </button>
+          <button class="sizeBtn" data-size="15" aria-label="Medium brush" type="button">
+            <span class="sizeBtnDot" style="width:14px;height:14px;"></span>
+          </button>
+          <button class="sizeBtn selected" data-size="22" aria-label="Large brush" type="button">
+            <span class="sizeBtnDot" style="width:20px;height:20px;"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="palette" id="palette"></div>
+
+  <div class="row">
+    <button class="btn-soft" id="eraser" type="button">Eraser</button>
+    <button class="btn-soft" id="undo" type="button">Undo</button>
+    <button class="btn-soft" id="clear" type="button">Clear</button>
+  </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/router.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/rewards.js"></script>
+<script src="js/coloring.js"></script>
+<script src="js/boot.js"></script>
+
+</body>
+</html>
