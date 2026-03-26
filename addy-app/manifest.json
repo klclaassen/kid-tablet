@@ -1,16 +1,25 @@
 {
   "name": "Addy App",
   "short_name": "Addy",
-  "start_url": "index.html",
+  "id": "/kid-tablet/",
+  "start_url": "/kid-tablet/workstation.html",
+  "scope": "/kid-tablet/",
   "display": "standalone",
   "background_color": "#2d1b69",
   "theme_color": "#2d1b69",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/app_1.png",
+      "src": "/kid-tablet/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/kid-tablet/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
