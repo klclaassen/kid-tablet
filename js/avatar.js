@@ -745,7 +745,7 @@ function go(viewName) {
   const backHomeBtn = document.getElementById("backHomeBtn");
   if (backHomeBtn) {
     backHomeBtn.onclick = () => {
-      window.location.href = "workstation.html";
+      window.location.href = "index.html";
     };
   }
 
