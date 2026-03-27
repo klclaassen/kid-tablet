@@ -17,6 +17,7 @@
 
 /* Reset */
 
+
 *{
   box-sizing:border-box;
 }
@@ -744,6 +745,22 @@ button:hover{
 
 .hidden{
   display:none !important;
+}
+
+.challenge-emoji{
+  font-size: clamp(64px, 12vw, 120px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:140px;
+  height:140px;
+  background:#fff;
+  border-radius:24px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.14);
+}
+
+.challenge-row{
+  gap:24px;
 }
 
 @media (max-width:900px){

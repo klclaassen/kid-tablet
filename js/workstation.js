@@ -635,12 +635,20 @@ document.getElementById("newPattern").onclick = newPattern;
 const challengeFeedback = document.getElementById("challengeFeedback");
 
 const WORD_CHALLENGES = [
-  { word: "CAR", img: "pages/truck1.png" },
-  { word: "TRUCK", img: "pages/truck1.png" },
-  { word: "TREE", img: "pages/turtle.png" },
-  { word: "DINO", img: "pages/dino1.png" },
-  { word: "TURTLE", img: "pages/turtle.png" },
-  { word: "OCTOPUS", img: "pages/octopus.png" }
+  { word: "car", emoji: "🚗" },
+  { word: "truck", emoji: "🚚" },
+  { word: "tree", emoji: "🌳" },
+  { word: "apple", emoji: "🍎" },
+  { word: "dog", emoji: "🐶" },
+  { word: "cat", emoji: "🐱" },
+  { word: "fish", emoji: "🐟" },
+  { word: "bird", emoji: "🐦" },
+  { word: "sun", emoji: "☀️" },
+  { word: "moon", emoji: "🌙" },
+  { word: "star", emoji: "⭐" },
+  { word: "ball", emoji: "⚽" },
+  { word: "ice cream", emoji: "🍦" },
+  { word: "cake", emoji: "🎂" }
 ];
 
 const NUMBER_NEXT_CHALLENGES = [
@@ -739,24 +747,35 @@ function renderTraceWordCard(card) {
 
   challengeCard.innerHTML = `
     <div class="challenge-inner">
-      <div class="challenge-title">${card.text}</div>
+      <div class="challenge-title">Trace the word</div>
 
       <div class="challenge-row">
-        <img class="challenge-image" src="${card.img}" alt="${card.word}">
+        <div class="challenge-emoji">${card.emoji}</div>
+
         <div class="challenge-canvas-wrap">
           <canvas id="challengeGuide" class="challenge-guide" width="340" height="340"></canvas>
           <canvas id="challengeDraw" class="draw-layer" width="340" height="340"></canvas>
         </div>
       </div>
 
-      <div class="challenge-row" style="font-size:28px; font-weight:900;">
+      <div class="challenge-row challenge-word-label">
         ${card.word}
       </div>
     </div>
   `;
 
-  drawGuideText(document.getElementById("challengeGuide"), card.word, font, "#42a5f5");
-  challengeDraw = wireDrawing(document.getElementById("challengeDraw"), () => "#42a5f5");
+  drawGuideText(
+    document.getElementById("challengeGuide"),
+    card.word,
+    font,
+    "#42a5f5"
+  );
+
+  challengeDraw = wireDrawing(
+    document.getElementById("challengeDraw"),
+    () => "#42a5f5",
+    12
+  );
 }
 
 function renderChoiceCard(card) {
