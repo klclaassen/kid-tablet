@@ -116,6 +116,8 @@
         <div class="muted">Streak: ${p.streakDays} days</div>
         <div class="muted">Last star day: ${p.lastStarDay || "—"}</div>
         <div class="muted">Total events stored: ${events.length}</div>
+        <div class="muted" style="margin-top:10px;">📖 Reading level: ${skills.reading?.level ?? 1}</div>
+        <div class="muted">💪 Challenges level: ${skills.challenges?.level ?? 1}</div>
       `;
 
       const rows = Object.entries(p.byModeStars || {})
@@ -140,6 +142,7 @@
       const payload = {
         exportedAt: new Date().toISOString(),
         progress: getProgress(),
+        skills: getSkills(),
         events: getEvents()
       };
 

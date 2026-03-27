@@ -1,8 +1,8 @@
-const CACHE_NAME = "addy-app-v1.7";
+const CACHE_NAME = "addy-app-v1.8";
 
 const URLS_TO_CACHE = [
   "./",
-  "workstation.html",
+  "index.html",
   "coloring_pages.html",
 
   "css/theme.css",

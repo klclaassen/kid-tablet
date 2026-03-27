@@ -1,5 +1,5 @@
 function goToWorkstation() {
-  window.location.href = "workstation.html";
+  window.location.href = "index.html";
 }
 
 function goToAvatar() {

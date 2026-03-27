@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (backBtn) {
     backBtn.onclick = () => {
-      location.href = "workstation.html";
+      location.href = "index.html";
     };
   }
 
