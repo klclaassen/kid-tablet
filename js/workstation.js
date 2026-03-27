@@ -623,30 +623,227 @@ document.getElementById("newPattern").onclick = newPattern;
  ***************/
 const challengeFeedback = document.getElementById("challengeFeedback");
 
-const TABLET_CHALLENGES = [
-  { text: "Trace the letter on the Letters screen.", mode: "letters" },
-  { text: "Trace the number on the Numbers screen.", mode: "numbers" },
-  { text: "Trace the shape on the Shapes screen.", mode: "shapes" },
-  { text: "Trace the next letter of your name.", mode: "name" },
-  { text: "Solve a pattern.", mode: "patterns" },
-  { text: "Draw 5 big lines with your finger, then press I Did It.", mode: "challenges" },
-  { text: "Draw a giant circle with your finger, then press I Did It.", mode: "challenges" },
-  { text: "Draw a zig-zag lightning line, then press I Did It.", mode: "challenges" }
+const WORD_CHALLENGES = [
+  { word: "CAR", img: "pages/boy1.png" },
+  { word: "TRUCK", img: "pages/truck1.png" },
+  { word: "TURTLE", img: "pages/turtle.png" },
+  { word: "OCTOPUS", img: "pages/octopus.png" },
+  { word: "DINO", img: "pages/dino1.png" },
+  { word: "ICE CREAM", img: "pages/icecreamtruck.png" }
+];
+
+const NUMBER_NEXT_CHALLENGES = [
+  { seq: ["1", "2", "3", "?"], answer: "4", wrong: ["5", "2", "6"] },
+  { seq: ["4", "5", "6", "?"], answer: "7", wrong: ["8", "5", "9"] },
+  { seq: ["7", "8", "9", "?"], answer: "10", wrong: ["11", "8", "6"] },
+  { seq: ["2", "4", "6", "?"], answer: "8", wrong: ["7", "10", "5"] },
+  { seq: ["3", "6", "9", "?"], answer: "12", wrong: ["10", "13", "15"] },
+  { seq: ["10", "9", "8", "?"], answer: "7", wrong: ["6", "9", "5"] }
+];
+
+const HARDER_PATTERN_CHALLENGES = [
+  { seq: ["🔴", "🔵", "🔴", "🔵", "?"], answer: "🔴", wrong: ["🔵", "🟢", "🟡"] },
+  { seq: ["⭐", "⭐", "🌙", "⭐", "⭐", "🌙", "?"], answer: "⭐", wrong: ["🌙", "☀️", "☁️"] },
+  { seq: ["🟩", "🟨", "🟨", "🟩", "🟨", "🟨", "?"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] },
+  { seq: ["🟪", "🟧", "🟪", "🟧", "🟪", "?"], answer: "🟧", wrong: ["🟪", "⬜", "🟩"] }
+];
+
+const WORD_PICK_CHALLENGES = [
+  { prompt: "Which word says CAR?", answer: "CAR", wrong: ["CAT", "CAN", "CUP"] },
+  { prompt: "Which word says TRUCK?", answer: "TRUCK", wrong: ["TRAIN", "TREE", "TRACK"] },
+  { prompt: "Which word says TREE?", answer: "TREE", wrong: ["TRUCK", "FREE", "FROG"] },
+  { prompt: "Which word says DINO?", answer: "DINO", wrong: ["DOG", "DOLL", "DUCK"] }
 ];
 
 let currentChallenge = null;
+let challengeDraw = null;
+let challengeSelected = null;
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function makeChallengeDeck() {
+  const wordCard = randomItem(WORD_CHALLENGES);
+  const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
+  const patternCard = randomItem(HARDER_PATTERN_CHALLENGES);
+  const wordPick = randomItem(WORD_PICK_CHALLENGES);
+
+  return [
+    {
+      type: "trace_word",
+      word: wordCard.word,
+      img: wordCard.img,
+      text: `Trace the word`
+    },
+    {
+      type: "sequence_pick",
+      text: "What number comes next?",
+      seq: nextCard.seq,
+      answer: nextCard.answer,
+      choices: shuffle([nextCard.answer, ...nextCard.wrong])
+    },
+    {
+      type: "pattern_pick",
+      text: "What comes next?",
+      seq: patternCard.seq,
+      answer: patternCard.answer,
+      choices: shuffle([patternCard.answer, ...patternCard.wrong])
+    },
+    {
+      type: "word_pick",
+      text: wordPick.prompt,
+      answer: wordPick.answer,
+      choices: shuffle([wordPick.answer, ...wordPick.wrong])
+    }
+  ];
+}
+
+function getChallengeGuideFont(word) {
+  if (word.length <= 4) return "bold 120px Arial";
+  if (word.length <= 6) return "bold 88px Arial";
+  if (word.length <= 8) return "bold 68px Arial";
+  return "bold 54px Arial";
+}
+
+function renderChoiceGrid(choices) {
+  return `
+    <div class="challenge-choice-grid">
+      ${choices.map(choice => `
+        <div class="challenge-choice" data-choice="${choice}">${choice}</div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function wireChallengeChoices() {
+  document.querySelectorAll(".challenge-choice").forEach(el => {
+    el.onclick = () => {
+      challengeSelected = el.dataset.choice;
+      document.querySelectorAll(".challenge-choice").forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+    };
+  });
+}
+
+function renderTraceWordCard(card) {
+  const challengeCard = document.getElementById("challengeCard");
+  const font = getChallengeGuideFont(card.word);
+
+  challengeCard.innerHTML = `
+    <div class="challenge-inner">
+      <div class="challenge-title">${card.text}</div>
+
+      <div class="challenge-row">
+        <img class="challenge-image" src="${card.img}" alt="${card.word}">
+        <div class="challenge-canvas-wrap">
+          <canvas id="challengeGuide" class="challenge-guide" width="340" height="340"></canvas>
+          <canvas id="challengeDraw" class="draw-layer" width="340" height="340"></canvas>
+        </div>
+      </div>
+
+      <div class="challenge-row" style="font-size:28px; font-weight:900;">
+        ${card.word}
+      </div>
+    </div>
+  `;
+
+  drawGuideText(document.getElementById("challengeGuide"), card.word, font, "#42a5f5");
+  challengeDraw = wireDrawing(document.getElementById("challengeDraw"), () => "#42a5f5");
+}
+
+function renderChoiceCard(card) {
+  const challengeCard = document.getElementById("challengeCard");
+
+  challengeCard.innerHTML = `
+    <div class="challenge-inner">
+      <div class="challenge-title">${card.text}</div>
+      ${card.seq ? `<div class="challenge-seq">${card.seq.map(x => `<span>${x}</span>`).join("")}</div>` : ""}
+      ${renderChoiceGrid(card.choices)}
+    </div>
+  `;
+
+  wireChallengeChoices();
+}
+
+function renderChallengeCard(card) {
+  challengeSelected = null;
+  challengeDraw = null;
+
+  if (card.type === "trace_word") {
+    renderTraceWordCard(card);
+    return;
+  }
+
+  renderChoiceCard(card);
+}
 
 function newChallenge() {
-  currentChallenge = randomItem(TABLET_CHALLENGES);
-  document.getElementById("challengeCard").textContent = currentChallenge.text;
+  currentChallenge = randomItem(makeChallengeDeck());
+  renderChallengeCard(currentChallenge);
   challengeFeedback.textContent = "";
 
   if (typeof logEvent === "function") {
     logEvent("new_item", {
       mode: "challenges",
-      challenge: currentChallenge.text,
-      suggestedMode: currentChallenge.mode
+      challengeType: currentChallenge.type,
+      challengeText: currentChallenge.text,
+      answer: currentChallenge.answer || currentChallenge.word || null
     });
+  }
+}
+
+function completeChallenge() {
+  flashFeedback(challengeFeedback, "Nice! ⭐");
+  awardSuccess("challenges");
+
+  if (typeof logEvent === "function") {
+    logEvent("challenge_completed", {
+      challengeType: currentChallenge ? currentChallenge.type : null,
+      answer: currentChallenge ? (currentChallenge.answer || currentChallenge.word || null) : null
+    });
+  }
+
+  setTimeout(newChallenge, 650);
+}
+
+function checkTraceWordChallenge() {
+  const font = getChallengeGuideFont(currentChallenge.word);
+  const mask = buildTextMask(currentChallenge.word, font);
+  const passed = checkMatchAgainstMask(document.getElementById("challengeDraw"), mask, "text");
+
+  if (typeof logEvent === "function") {
+    logEvent("challenge_checked", {
+      challengeType: "trace_word",
+      word: currentChallenge.word,
+      passed
+    });
+  }
+
+  if (passed) {
+    completeChallenge();
+  } else {
+    flashFeedback(challengeFeedback, "Try again!");
+    if (challengeDraw) challengeDraw.clear();
+  }
+}
+
+function checkChoiceChallenge() {
+  const passed = challengeSelected === currentChallenge.answer;
+
+  if (typeof logEvent === "function") {
+    logEvent("challenge_checked", {
+      challengeType: currentChallenge.type,
+      selected: challengeSelected,
+      answer: currentChallenge.answer,
+      passed
+    });
+  }
+
+  if (passed) {
+    completeChallenge();
+  } else {
+    flashFeedback(challengeFeedback, "Try again!");
   }
 }
 
@@ -655,17 +852,18 @@ document.getElementById("btnChallenges").onclick = () => {
   showScreen("challenges");
 };
 
-document.getElementById("newChallenge").onclick = newChallenge;
+document.getElementById("newChallenge").onclick = () => newChallenge();
 
 document.getElementById("challengeDone").onclick = () => {
-  if (!currentChallenge) newChallenge();
-
-  flashFeedback(challengeFeedback, "Nice! ⭐");
-  awardSuccess("challenges");
-
-  if (typeof logEvent === "function") {
-    logEvent("challenge_completed", { challenge: currentChallenge ? currentChallenge.text : null });
+  if (!currentChallenge) {
+    newChallenge();
+    return;
   }
 
-  setTimeout(newChallenge, 650);
+  if (currentChallenge.type === "trace_word") {
+    checkTraceWordChallenge();
+    return;
+  }
+
+  checkChoiceChallenge();
 };
