@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const emptyState = document.getElementById("emptyState");
   const starsEl = document.getElementById("shopStars");
 
-  const draw = document.getElementById("draw");
+  const draw = document.getElementById("colorLayer");
   const dctx = draw.getContext("2d");
   const lineArtImg = document.getElementById("lineArtImg");
 
