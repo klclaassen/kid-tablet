@@ -231,7 +231,7 @@ function newLetters() {
   drawGuideText(
     document.getElementById("lettersGuide"),
     currentLetterVariant === "upper" ? currentLetter.toUpperCase() : currentLetter.toLowerCase(),
-    currentLetterVariant === "upper" ? "bold 190px Arial" : "bold 170px Arial",
+    currentLetterVariant === "upper" ? "bold 190px Comic Neue" : "bold 170px Comic Neue",
     "#5e35b1"
   );
 
@@ -256,7 +256,7 @@ document.getElementById("lettersClear").onclick = () => {
 
 document.getElementById("lettersDone").onclick = () => {
   const targetText = currentLetterVariant === "upper" ? currentLetter.toUpperCase() : currentLetter.toLowerCase();
-  const font = currentLetterVariant === "upper" ? "bold 190px Arial" : "bold 170px Arial";
+  const font = currentLetterVariant === "upper" ? "bold 190px Comic Neue" : "bold 170px Comic Neue";
 
   const mask = buildTextMask(targetText, font);
   const passed = checkMatchAgainstMask(document.getElementById("lettersDraw"), mask, "text");
@@ -303,7 +303,7 @@ function newNumbers() {
   document.getElementById("numbersValue").textContent = currentNumber;
   renderNumberGrid(parseInt(currentNumber, 10), currentNumberEmoji);
 
-  drawGuideText(document.getElementById("numbersGuide"), currentNumber, "bold 200px Arial", "#fb8c00");
+  drawGuideText(document.getElementById("numbersGuide"), currentNumber, "bold 200px Comic Neue", "#fb8c00");
   numbersDraw.clear();
 
   if (typeof logEvent === "function") {
@@ -324,7 +324,7 @@ document.getElementById("numbersClear").onclick = () => {
 };
 
 document.getElementById("numbersDone").onclick = () => {
-  const mask = buildTextMask(currentNumber, "bold 200px Arial");
+  const mask = buildTextMask(currentNumber, "bold 200px Comic Neue");
   const passed = checkMatchAgainstMask(document.getElementById("numbersDraw"), mask, "text");
 
   if (typeof logEvent === "function") {
@@ -385,7 +385,7 @@ function renderName() {
   const char = word[nameCharIndex];
 
   document.getElementById("nameWord").innerHTML = buildNameHTML(word, nameCharIndex);
-  drawGuideText(document.getElementById("nameGuide"), char, "bold 190px Arial", "#607d8b");
+  drawGuideText(document.getElementById("nameGuide"), char, "bold 190px Comic Neue", "#607d8b");
   nameDraw.clear();
 
   if (typeof logEvent === "function") {
@@ -424,7 +424,7 @@ document.getElementById("nameClear").onclick = () => {
 document.getElementById("nameDone").onclick = () => {
   const word = nameWords[nameWordIndex];
   const char = word[nameCharIndex];
-  const mask = buildTextMask(char, "bold 190px Arial");
+  const mask = buildTextMask(char, "bold 190px Comic Neue");
   const passed = checkMatchAgainstMask(document.getElementById("nameDraw"), mask, "text");
 
   if (typeof logEvent === "function") {
@@ -707,10 +707,10 @@ function makeChallengeDeck() {
 }
 
 function getChallengeGuideFont(word) {
-  if (word.length <= 4) return "bold 120px Arial";
-  if (word.length <= 6) return "bold 88px Arial";
-  if (word.length <= 8) return "bold 68px Arial";
-  return "bold 54px Arial";
+  if (word.length <= 4) return "bold 120px Comic Neue";
+  if (word.length <= 6) return "bold 88px Comic Neue";
+  if (word.length <= 8) return "bold 68px Comic Neue";
+  return "bold 54px Comic Neue";
 }
 
 function renderChoiceGrid(choices) {
@@ -853,6 +853,12 @@ function checkChoiceChallenge() {
     flashFeedback(challengeFeedback, "Try again!");
   }
 }
+
+window.addEventListener("load", async () => {
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+});
 
 document.getElementById("btnChallenges").onclick = () => {
   newChallenge();
