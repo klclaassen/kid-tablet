@@ -921,6 +921,8 @@ function checkTraceWordChallenge() {
   const mask = buildTextMask(currentChallenge.word, font);
   const passed = checkMatchAgainstMask(document.getElementById("challengeDraw"), mask, "text");
 
+  recordSkillResult("challenges", passed, 4);
+
   if (typeof logEvent === "function") {
     logEvent("challenge_checked", {
       challengeType: "trace_word",
@@ -948,6 +950,8 @@ function checkChoiceChallenge() {
       passed
     });
   }
+
+  recordSkillResult("challenges", passed, 4);
 
   if (passed) {
     completeChallenge();
@@ -1006,18 +1010,30 @@ let readingSelected = null;
  * BUILD CARDS
  ***************/
 function makeReadingCard() {
-  const item = randomItem(READING_WORDS);
+  const skill = getSkill("reading");
+  const level = skill.level;
 
-  const type = randomItem(["start_sound", "finish_word", "match_word"]);
+  let pool = READING_WORDS;
 
-  // START SOUND
+  if (level === 1) {
+    pool = READING_WORDS.filter(x => x.word.length <= 3 || x.word === "car");
+  } else if (level === 2) {
+    pool = READING_WORDS.filter(x => x.word.length <= 4);
+  }
+
+  const item = randomItem(pool);
+
+  let availableTypes = ["start_sound"];
+  if (level >= 2) availableTypes.push("finish_word");
+  if (level >= 3) availableTypes.push("match_word");
+
+  const type = randomItem(availableTypes);
+
   if (type === "start_sound") {
     const correct = item.word[0];
-
     const letters = "abcdefghijklmnopqrstuvwxyz".split("");
-    const wrong = shuffle(
-      letters.filter(l => l !== correct)
-    ).slice(0, 3);
+    const wrongCount = level >= 2 ? 3 : 2;
+    const wrong = shuffle(letters.filter(l => l !== correct)).slice(0, wrongCount);
 
     return {
       type,
@@ -1027,6 +1043,39 @@ function makeReadingCard() {
       choices: shuffle([correct, ...wrong])
     };
   }
+
+  if (type === "finish_word") {
+    const index = Math.min(
+      Math.max(1, randInt(1, item.word.length - 1)),
+      item.word.length - 1
+    );
+    const missing = item.word[index];
+    const display = item.word.slice(0, index) + "_" + item.word.slice(index + 1);
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    const wrong = shuffle(letters.filter(l => l !== missing)).slice(0, 3);
+
+    return {
+      type,
+      text: "Finish the word",
+      emoji: item.emoji,
+      display,
+      answer: missing,
+      choices: shuffle([missing, ...wrong])
+    };
+  }
+
+  const wrongWords = shuffle(
+    READING_WORDS.map(w => w.word).filter(w => w !== item.word)
+  ).slice(0, level >= 4 ? 3 : 2);
+
+  return {
+    type: "match_word",
+    text: "Which word matches?",
+    emoji: item.emoji,
+    answer: item.word,
+    choices: shuffle([item.word, ...wrongWords])
+  };
+}
 
   // FINISH WORD
   if (type === "finish_word") {
@@ -1132,8 +1181,11 @@ function checkReading() {
 
   const correct = String(currentReading.answer);
   const picked = String(readingSelected);
+  const passed = picked === correct;
 
-  if (picked === correct) {
+  recordSkillResult("reading", passed, 4);
+
+  if (passed) {
     flashFeedback(readingFeedback, "Nice reading! ⭐");
     awardSuccess("reading");
     setTimeout(newReading, 650);
