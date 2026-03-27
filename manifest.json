@@ -1,8 +1,8 @@
 {
-  "name": "Addy App",
-  "short_name": "Addy",
+  "name": "Workstation",
+  "short_name": "Workstation",
   "id": "/kid-tablet/",
-  "start_url": "/kid-tablet/workstation.html",
+  "start_url": "/kid-tablet/index.html",
   "scope": "/kid-tablet/",
   "display": "standalone",
   "background_color": "#2d1b69",
