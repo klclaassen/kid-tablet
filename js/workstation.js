@@ -1228,7 +1228,7 @@ function renderReadingCard(card) {
         <div class="challenge-title">${card.text}</div>
 
         <div class="challenge-row">
-          <div class="challenge-emoji">${card.emoji}</div>
+          <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
         </div>
 
         <div class="challenge-row" style="font-size:48px; font-weight:900;">
@@ -1244,7 +1244,7 @@ function renderReadingCard(card) {
         <div class="challenge-title">${card.text}</div>
 
         <div class="challenge-row">
-          <div class="challenge-emoji">${card.emoji}</div>
+          <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
         </div>
 
         ${renderChoiceGrid(card.choices)}
