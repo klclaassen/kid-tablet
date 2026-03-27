@@ -18,8 +18,13 @@ const screens = {
 };
 
 function showScreen(key) {
-  Object.values(screens).forEach(el => el.classList.remove("active"));
-  screens[key].classList.add("active");
+  Object.values(screens).forEach(el => {
+    if (el) el.classList.remove("active");
+  });
+
+  if (screens[key]) {
+    screens[key].classList.add("active");
+  }
 
   if (typeof logScreenView === "function") {
     logScreenView(key);
