@@ -57,27 +57,55 @@ function loadDrawing(pageId, ctx, canvas, callback) {
   img.src = data;
 }
 
-let history = [];
+document.addEventListener("DOMContentLoaded", () => {
+  const libraryView = document.getElementById("libraryView");
+  const colorView = document.getElementById("colorView");
+  const grid = document.getElementById("pageGrid");
+  const emptyState = document.getElementById("emptyState");
+  const starsEl = document.getElementById("shopStars");
 
-function saveHistory(){
-  history.push(draw.toDataURL());
-  if(history.length > 20) history.shift();
-}
+  const draw = document.getElementById("colorLayer");
+  const dctx = draw.getContext("2d");
+  const previewLayer = document.getElementById("previewLayer");
+  const pctx = previewLayer.getContext("2d");
+  const lineArtImg = document.getElementById("lineArtImg");
 
-undo.onclick = () => {
-  const last = history.pop();
-  if(!last) return;
+  const eraserBtn = document.getElementById("eraser");
+  const clearBtn = document.getElementById("clear");
+  const undoBtn = document.getElementById("undo");
+  const pal = document.getElementById("palette");
 
-  const img = new Image();
-  img.onload = () => dctx.drawImage(img,0,0);
-  img.src = last;
-};
+  let currentColor = COLORS[0];
+  let currentLineWidth = 22;
+  let erasing = false;
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let firstSwatchBtn = null;
+  let currentPage = null;
+  let history = [];
 
-const colorLayer = document.getElementById("colorLayer");
-const cctx = colorLayer.getContext("2d");
+  function saveHistory() {
+    history.push(draw.toDataURL("image/png"));
+    if (history.length > 20) history.shift();
+  }
 
-const previewLayer = document.getElementById("previewLayer");
-const pctx = previewLayer.getContext("2d");
+  function restoreHistory() {
+    const last = history.pop();
+    if (!last) return;
+
+    const img = new Image();
+    img.onload = () => {
+      dctx.clearRect(0, 0, draw.width, draw.height);
+      dctx.drawImage(img, 0, 0, draw.width, draw.height);
+      if (currentPage) saveDrawing(currentPage.id, draw);
+    };
+    img.src = last;
+  }
+
+  if (undoBtn) {
+    undoBtn.onclick = restoreHistory;
+  }
 
 document.addEventListener("DOMContentLoaded", () => {
   const libraryView = document.getElementById("libraryView");
@@ -280,6 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function start(e) {
     e.preventDefault();
+    saveHistory();
     drawing = true;
     [lastX, lastY] = xy(e);
   }

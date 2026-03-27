@@ -1,12 +1,16 @@
-const CACHE_NAME = "addy-app-v2.2";
+const CACHE_NAME = "addy-app-v2.3";
 
 const URLS_TO_CACHE = [
   "./",
   "index.html",
+  "avatar.html",
   "coloring_pages.html",
+  "analytics.html",
+  "manifest.json",
 
   "css/theme.css",
   "css/coloring.css",
+  "css/avatar.css",
 
   "js/storage.js",
   "js/router.js",
@@ -14,6 +18,9 @@ const URLS_TO_CACHE = [
   "js/analytics.js",
   "js/rewards.js",
   "js/coloring.js",
+  "js/avatar.js",
+  "js/workstation.js",
+  "js/settings.js",
   "js/boot.js",
 
   "pages/boy1.png",
@@ -38,11 +45,9 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       )
     )
   );
@@ -51,16 +56,6 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
-});
-
-self.addEventListener("activate", event => {
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener("install", event => {
-  self.skipWaiting();
 });

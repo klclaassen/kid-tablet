@@ -1,29 +1,32 @@
 const DEFAULT_PROGRESS = {
   stars: 0,
-  byModeStars: {
-    letters: 0,
-    numbers: 0,
-    name: 0,
-    shapes: 0,
-    patterns: 0,
-    challenges: 0
-  },
-  byModeSuccess: {
-    letters: 0,
-    numbers: 0,
-    name: 0,
-    shapes: 0,
-    patterns: 0,
-    challenges: 0
-  },
-  byModeRewards: {
-    letters: 0,
-    numbers: 0,
-    name: 0,
-    shapes: 0,
-    patterns: 0,
-    challenges: 0
-  },
+byModeStars: {
+  letters: 0,
+  numbers: 0,
+  name: 0,
+  reading: 0,
+  shapes: 0,
+  patterns: 0,
+  challenges: 0
+},
+byModeSuccess: {
+  letters: 0,
+  numbers: 0,
+  name: 0,
+  reading: 0,
+  shapes: 0,
+  patterns: 0,
+  challenges: 0
+},
+byModeRewards: {
+  letters: 0,
+  numbers: 0,
+  name: 0,
+  reading: 0,
+  shapes: 0,
+  patterns: 0,
+  challenges: 0
+},
   lastStarDay: null,
   streakDays: 0
 };

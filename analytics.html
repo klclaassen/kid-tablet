@@ -154,7 +154,7 @@ function renderAnalyticsPage() {
   /***************
    * TIME
    ***************/
-  const maxTime = Math.max(...Object.values(stats.timeByMode), 1);
+  const maxTime = Math.max(...Object.values(stats.timeByMode || {}), 1);
 
   let timeHTML = `<h2 style="font-size:18px;">Time Spent</h2>`;
 

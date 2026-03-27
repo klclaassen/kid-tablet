@@ -38,7 +38,9 @@ function getSkills() {
     reading: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 },
     challenges: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 },
     letters: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 },
-    numbers: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 }
+    numbers: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 },
+    shapes: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 },
+    patterns: { level: 1, streak: 0, wrongStreak: 0, correct: 0, wrong: 0 }
   });
 }
 
