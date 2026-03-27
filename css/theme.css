@@ -742,6 +742,10 @@ button:hover{
   }
 }
 
+.hidden{
+  display:none !important;
+}
+
 @media (max-width:900px){
   .activity-shell{
     gap:18px;

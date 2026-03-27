@@ -194,6 +194,12 @@ function wireSettingsUI() {
     if (childNameEditor) childNameEditor.classList.remove("hidden");
   }
 
+    if (pinInput) {
+    pinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitParentPin();
+    });
+  }
+
   function closeChildNameEditor() {
     if (childNameEditor) childNameEditor.classList.add("hidden");
   }
@@ -355,12 +361,6 @@ function wireSettingsUI() {
         closeParentPin();
       }
     };
-  }
-
-  if (pinInput) {
-    pinInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") submitParentPin();
-    });
   }
 
   renderSettingsButtons();
