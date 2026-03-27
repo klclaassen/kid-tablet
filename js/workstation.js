@@ -11,6 +11,7 @@ const screens = {
   letters: document.getElementById("lettersScreen"),
   numbers: document.getElementById("numbersScreen"),
   name: document.getElementById("nameScreen"),
+  reading: document.getElementById("readingScreen"),
   shapes: document.getElementById("shapesScreen"),
   patterns: document.getElementById("patternsScreen"),
   challenges: document.getElementById("challengesScreen")
@@ -55,7 +56,7 @@ function flashFeedback(el, text, ms = 900) {
   }, ms);
 }
 
-function wireDrawing(drawCanvas, colorGetter) {
+function wireDrawing(drawCanvas, colorGetter, lineWidth = 18) {
   const ctx = drawCanvas.getContext("2d");
   let drawing = false;
   let lastX = 0;
@@ -83,7 +84,7 @@ function wireDrawing(drawCanvas, colorGetter) {
     const [x, y] = getXY(e);
 
     ctx.save();
-    ctx.lineWidth = 18;
+    ctx.lineWidth = lineWidth;
     ctx.lineCap = "round";
     ctx.strokeStyle = colorGetter();
     ctx.beginPath();
@@ -679,10 +680,10 @@ const HARDER_PATTERN_CHALLENGES = [
 ];
 
 const WORD_PICK_CHALLENGES = [
-  { prompt: "Which word says CAR?", answer: "CAR", wrong: ["CAT", "CAN", "CUP"] },
-  { prompt: "Which word says TRUCK?", answer: "TRUCK", wrong: ["TRAIN", "TREE", "TRACK"] },
-  { prompt: "Which word says TREE?", answer: "TREE", wrong: ["TRUCK", "FREE", "FROG"] },
-  { prompt: "Which word says DINO?", answer: "DINO", wrong: ["DOG", "DOLL", "DUCK"] }
+  { prompt: "Which word says car?", answer: "car", wrong: ["cat", "can", "cup"] },
+  { prompt: "Which word says truck?", answer: "truck", wrong: ["train", "tree", "track"] },
+  { prompt: "Which word says tree?", answer: "tree", wrong: ["truck", "free", "frog"] },
+  { prompt: "Which word says dog?", answer: "dog", wrong: ["dig", "dot", "duck"] }
 ];
 
 let currentChallenge = null;
@@ -693,9 +694,10 @@ function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function makeCountingCard() {
+function makeCountingCard(level) {
   const item = randomItem(COUNTING_CHALLENGES);
-  const count = randInt(3, 10);
+  const maxCount = level === 1 ? 5 : level === 2 ? 8 : 10;
+  const count = randInt(2, maxCount);
 
   const wrongSet = new Set();
   while (wrongSet.size < 3) {
@@ -717,11 +719,33 @@ function makeCountingCard() {
 }
 
 function makeChallengeDeck() {
-  const wordCard = randomItem(WORD_CHALLENGES);
-  const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
-  const patternCard = randomItem(HARDER_PATTERN_CHALLENGES);
-  const wordPick = randomItem(WORD_PICK_CHALLENGES);
-  const countCard = makeCountingCard();
+  const level = getSkill("challenges").level;
+
+  const shortWords = WORD_CHALLENGES.filter(w => w.word.replace(/\s+/g, "").length <= 4);
+  const mediumWords = WORD_CHALLENGES.filter(w => w.word.replace(/\s+/g, "").length <= 6);
+
+  const wordPool =
+    level === 1 ? shortWords :
+    level === 2 ? mediumWords :
+    WORD_CHALLENGES;
+
+  const nextPool =
+    level === 1 ? NUMBER_NEXT_CHALLENGES.slice(0, 3) :
+    NUMBER_NEXT_CHALLENGES;
+
+  const patternPool =
+    level === 1 ? HARDER_PATTERN_CHALLENGES.slice(0, 2) :
+    HARDER_PATTERN_CHALLENGES;
+
+  const wordPickPool =
+    level === 1 ? WORD_PICK_CHALLENGES.slice(0, 2) :
+    WORD_PICK_CHALLENGES;
+
+  const wordCard = randomItem(wordPool);
+  const nextCard = randomItem(nextPool);
+  const patternCard = randomItem(patternPool);
+  const wordPick = randomItem(wordPickPool);
+  const countCard = makeCountingCard(level);
 
   return [
     {
@@ -755,10 +779,11 @@ function makeChallengeDeck() {
 }
 
 function getChallengeGuideFont(word) {
-  if (word.length <= 4) return "bold 120px Andika";
-  if (word.length <= 6) return "bold 88px Andika";
-  if (word.length <= 8) return "bold 68px Andika";
-  return "bold 54px Andika";
+  const clean = word.replace(/\s+/g, "");
+  if (clean.length <= 4) return "bold 150px Andika";
+  if (clean.length <= 6) return "bold 118px Andika";
+  if (clean.length <= 8) return "bold 88px Andika";
+  return "bold 68px Andika";
 }
 
 function renderChoiceGrid(choices) {
@@ -832,42 +857,22 @@ function renderChoiceCard(card) {
   wireChallengeChoices();
 }
 
-function makeChallengeDeck() {
-  const wordCard = randomItem(WORD_CHALLENGES);
-  const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
-  const patternCard = randomItem(HARDER_PATTERN_CHALLENGES);
-  const wordPick = randomItem(WORD_PICK_CHALLENGES);
-  const countCard = makeCountingCard();
+function renderCountCard(card) {
+  const challengeCard = document.getElementById("challengeCard");
 
-  return [
-    {
-      type: "trace_word",
-      word: wordCard.word,
-      emoji: wordCard.emoji,
-      text: "Trace the word"
-    },
-    {
-      type: "sequence_pick",
-      text: "What number comes next?",
-      seq: nextCard.seq,
-      answer: nextCard.answer,
-      choices: shuffle([nextCard.answer, ...nextCard.wrong])
-    },
-    {
-      type: "pattern_pick",
-      text: "What comes next?",
-      seq: patternCard.seq,
-      answer: patternCard.answer,
-      choices: shuffle([patternCard.answer, ...patternCard.wrong])
-    },
-    {
-      type: "word_pick",
-      text: wordPick.prompt,
-      answer: wordPick.answer,
-      choices: shuffle([wordPick.answer, ...wordPick.wrong])
-    },
-    countCard
-  ];
+  const emojiRow = Array.from({ length: card.count }, () =>
+    `<span class="count-emoji">${card.countingEmoji}</span>`
+  ).join("");
+
+  challengeCard.innerHTML = `
+    <div class="challenge-inner">
+      <div class="challenge-title">${card.text}</div>
+      <div class="challenge-count-row">${emojiRow}</div>
+      ${renderChoiceGrid(card.choices)}
+    </div>
+  `;
+
+  wireChallengeChoices();
 }
 
 function renderChallengeCard(card) {
@@ -897,7 +902,8 @@ function newChallenge() {
       mode: "challenges",
       challengeType: currentChallenge.type,
       challengeText: currentChallenge.text,
-      answer: currentChallenge.answer || currentChallenge.word || null
+      answer: currentChallenge.answer || currentChallenge.word || null,
+      level: getSkill("challenges").level
     });
   }
 }
@@ -909,7 +915,8 @@ function completeChallenge() {
   if (typeof logEvent === "function") {
     logEvent("challenge_completed", {
       challengeType: currentChallenge ? currentChallenge.type : null,
-      answer: currentChallenge ? (currentChallenge.answer || currentChallenge.word || null) : null
+      answer: currentChallenge ? (currentChallenge.answer || currentChallenge.word || null) : null,
+      level: getSkill("challenges").level
     });
   }
 
@@ -927,7 +934,8 @@ function checkTraceWordChallenge() {
     logEvent("challenge_checked", {
       challengeType: "trace_word",
       word: currentChallenge.word,
-      passed
+      passed,
+      level: getSkill("challenges").level
     });
   }
 
@@ -942,16 +950,17 @@ function checkTraceWordChallenge() {
 function checkChoiceChallenge() {
   const passed = challengeSelected === currentChallenge.answer;
 
+  recordSkillResult("challenges", passed, 4);
+
   if (typeof logEvent === "function") {
     logEvent("challenge_checked", {
       challengeType: currentChallenge.type,
       selected: challengeSelected,
       answer: currentChallenge.answer,
-      passed
+      passed,
+      level: getSkill("challenges").level
     });
   }
-
-  recordSkillResult("challenges", passed, 4);
 
   if (passed) {
     completeChallenge();
@@ -959,12 +968,6 @@ function checkChoiceChallenge() {
     flashFeedback(challengeFeedback, "Try again!");
   }
 }
-
-window.addEventListener("load", async () => {
-  if (document.fonts && document.fonts.ready) {
-    await document.fonts.ready;
-  }
-});
 
 document.getElementById("btnChallenges").onclick = () => {
   newChallenge();
@@ -1000,15 +1003,14 @@ const READING_WORDS = [
   { word: "hat", emoji: "🎩" },
   { word: "fish", emoji: "🐟" },
   { word: "tree", emoji: "🌳" },
-  { word: "star", emoji: "⭐" }
+  { word: "star", emoji: "⭐" },
+  { word: "bus", emoji: "🚌" },
+  { word: "moon", emoji: "🌙" }
 ];
 
 let currentReading = null;
 let readingSelected = null;
 
-/***************
- * BUILD CARDS
- ***************/
 function makeReadingCard() {
   const skill = getSkill("reading");
   const level = skill.level;
@@ -1049,6 +1051,7 @@ function makeReadingCard() {
       Math.max(1, randInt(1, item.word.length - 1)),
       item.word.length - 1
     );
+
     const missing = item.word[index];
     const display = item.word.slice(0, index) + "_" + item.word.slice(index + 1);
     const letters = "abcdefghijklmnopqrstuvwxyz".split("");
@@ -1077,46 +1080,6 @@ function makeReadingCard() {
   };
 }
 
-  // FINISH WORD
-  if (type === "finish_word") {
-    const index = randInt(1, item.word.length - 1);
-    const missing = item.word[index];
-
-    const display =
-      item.word.slice(0, index) + "_" + item.word.slice(index + 1);
-
-    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
-    const wrong = shuffle(
-      letters.filter(l => l !== missing)
-    ).slice(0, 3);
-
-    return {
-      type,
-      text: "Finish the word",
-      emoji: item.emoji,
-      display,
-      answer: missing,
-      choices: shuffle([missing, ...wrong])
-    };
-  }
-
-  // MATCH WORD
-  const wrongWords = shuffle(
-    READING_WORDS.map(w => w.word).filter(w => w !== item.word)
-  ).slice(0, 3);
-
-  return {
-    type: "match_word",
-    text: "Which word matches?",
-    emoji: item.emoji,
-    answer: item.word,
-    choices: shuffle([item.word, ...wrongWords])
-  };
-}
-
-/***************
- * RENDER
- ***************/
 function renderReadingCard(card) {
   const el = document.getElementById("readingCard");
   readingSelected = null;
@@ -1155,11 +1118,11 @@ function renderReadingCard(card) {
 }
 
 function wireReadingChoices() {
-  document.querySelectorAll(".challenge-choice").forEach(btn => {
+  document.querySelectorAll("#readingCard .challenge-choice").forEach(btn => {
     btn.onclick = () => {
       readingSelected = btn.textContent;
 
-      document.querySelectorAll(".challenge-choice")
+      document.querySelectorAll("#readingCard .challenge-choice")
         .forEach(b => b.classList.remove("selected"));
 
       btn.classList.add("selected");
@@ -1167,13 +1130,19 @@ function wireReadingChoices() {
   });
 }
 
-/***************
- * FLOW
- ***************/
 function newReading() {
   currentReading = makeReadingCard();
   renderReadingCard(currentReading);
   readingFeedback.textContent = "";
+
+  if (typeof logEvent === "function") {
+    logEvent("new_item", {
+      mode: "reading",
+      type: currentReading.type,
+      answer: currentReading.answer,
+      level: getSkill("reading").level
+    });
+  }
 }
 
 function checkReading() {
@@ -1185,6 +1154,16 @@ function checkReading() {
 
   recordSkillResult("reading", passed, 4);
 
+  if (typeof logEvent === "function") {
+    logEvent("reading_checked", {
+      type: currentReading.type,
+      picked,
+      correct,
+      passed,
+      level: getSkill("reading").level
+    });
+  }
+
   if (passed) {
     flashFeedback(readingFeedback, "Nice reading! ⭐");
     awardSuccess("reading");
@@ -1194,9 +1173,6 @@ function checkReading() {
   }
 }
 
-/***************
- * BUTTONS
- ***************/
 document.getElementById("btnReading").onclick = () => {
   newReading();
   showScreen("reading");
