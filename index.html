@@ -42,6 +42,7 @@
       <div class="home-sub">Pick an activity ✨</div>
       <button class="btn-patterns" id="goMenu">✏️ Learning</button>
       <button class="btn-patterns" id="btnColoring">🎨 Coloring</button>
+      <button class="btn-patterns" id="btnRewards">🏆 Trophy Room</button>
       <button class="btn-patterns" id="openSettings">⚙️ Settings</button>
     </div>
   </div>
@@ -73,6 +74,33 @@
     </div>
   </div>
 </div>
+
+
+<!-- Trophy Room -->
+<div class="screen" id="trophyScreen">
+  <div class="top-row">
+    <div class="section-title">Trophy Room</div>
+    <button class="btn-back" id="trophyBackBtn">Back</button>
+  </div>
+
+  <div class="analyticsWrap">
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">🌟 Recommended Next</h2>
+      <div id="trophyRecommendation"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">🏅 Milestones</h2>
+      <div id="trophyMilestones"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">📈 Progress Snapshot</h2>
+      <div id="trophySnapshot"></div>
+    </div>
+  </div>
+</div>
+
 
   <!-- Settings -->
   <div class="reward-overlay" id="settingsOverlay" aria-hidden="true">
@@ -332,7 +360,7 @@
   <!-- Challenges -->
   <div class="screen" id="challengesScreen">
     <div class="top-row">
-      <div class="section-title">Challenge Cards</div>
+      <div class="section-title">Challenge</div>
       <button class="btn-back backToMenu">Back</button>
     </div>
 

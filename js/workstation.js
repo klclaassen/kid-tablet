@@ -8,6 +8,7 @@ if (btnColoring) {
 const screens = {
   home: document.getElementById("homeScreen"),
   menu: document.getElementById("menuScreen"),
+  trophy: document.getElementById("trophyScreen"),
   letters: document.getElementById("lettersScreen"),
   numbers: document.getElementById("numbersScreen"),
   name: document.getElementById("nameScreen"),
@@ -15,6 +16,7 @@ const screens = {
   shapes: document.getElementById("shapesScreen"),
   patterns: document.getElementById("patternsScreen"),
   challenges: document.getElementById("challengesScreen")
+
 };
 
 function showScreen(key) {
@@ -31,8 +33,34 @@ function showScreen(key) {
   }
 }
 
+<!-- Trophy Room -->
+<div class="screen" id="trophyScreen">
+  <div class="top-row">
+    <div class="section-title">Trophy Room</div>
+    <button class="btn-back" id="trophyBackBtn">Back</button>
+  </div>
+
+  <div class="analyticsWrap">
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">🌟 Recommended Next</h2>
+      <div id="trophyRecommendation"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">🏅 Milestones</h2>
+      <div id="trophyMilestones"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <h2 style="margin:0 0 10px; font-size:20px;">📈 Progress Snapshot</h2>
+      <div id="trophySnapshot"></div>
+    </div>
+  </div>
+</div>
+
 document.getElementById("goMenu").onclick = () => showScreen("menu");
 document.getElementById("menuBackBtn").onclick = () => showScreen("home");
+document.getElementById("trophyBackBtn").onclick = () => showScreen("home");
 document.querySelectorAll(".backToMenu").forEach(btn => {
   btn.onclick = () => showScreen("menu");
 });
@@ -945,7 +973,9 @@ function renderTraceWordCard(card) {
       <div class="challenge-title">Trace the word</div>
 
       <div class="challenge-row">
-        <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
+        <button type="button" class="challenge-emoji challenge-emoji-btn" aria-label="Say ${card.word || card.answer}">
+  ${card.emoji}
+</button>
 
         <div class="challenge-canvas-wrap">
           <canvas id="challengeGuide" class="challenge-guide" width="340" height="340"></canvas>
@@ -969,6 +999,17 @@ function renderTraceWordCard(card) {
   const emojiEl = challengeCard.querySelector(".challenge-emoji");
   if (emojiEl) {
     emojiEl.onclick = () => speak(card.word || card.answer);
+  }
+  const emojiEl = challengeCard.querySelector(".challenge-emoji");
+  if (emojiEl) {
+    emojiEl.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      speak(card.word);
+    };
+
+    emojiEl.oncontextmenu = (e) => e.preventDefault();
+    emojiEl.onpointerdown = (e) => e.preventDefault();
   }
 
   challengeDraw = wireDrawing(
@@ -1228,7 +1269,9 @@ function renderReadingCard(card) {
         <div class="challenge-title">${card.text}</div>
 
         <div class="challenge-row">
-          <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
+          <button type="button" class="challenge-emoji challenge-emoji-btn" aria-label="Say ${card.word || card.answer}">
+  ${card.emoji}
+</button>
         </div>
 
         <div class="challenge-row" style="font-size:48px; font-weight:900;">
@@ -1244,7 +1287,9 @@ function renderReadingCard(card) {
         <div class="challenge-title">${card.text}</div>
 
         <div class="challenge-row">
-          <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
+          <button type="button" class="challenge-emoji challenge-emoji-btn" aria-label="Say ${card.word || card.answer}">
+  ${card.emoji}
+</button>
         </div>
 
         ${renderChoiceGrid(card.choices)}
@@ -1255,6 +1300,18 @@ function renderReadingCard(card) {
   const emojiEl = el.querySelector(".challenge-emoji");
   if (emojiEl) {
     emojiEl.onclick = () => speak(card.word || card.answer);
+  }
+
+  const emojiEl = challengeCard.querySelector(".challenge-emoji");
+  if (emojiEl) {
+    emojiEl.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      speak(card.word);
+    };
+
+    emojiEl.oncontextmenu = (e) => e.preventDefault();
+    emojiEl.onpointerdown = (e) => e.preventDefault();
   }
 
   wireReadingChoices();

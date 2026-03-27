@@ -68,6 +68,14 @@
     </div>
 
     <div class="analyticsCard">
+      <div id="time"></div>
+    </div>
+
+    <div class="analyticsCard">
+      <div id="accuracy"></div>
+    </div>
+
+    <div class="analyticsCard">
       <div id="summary"></div>
     </div>
 
@@ -107,65 +115,84 @@
   }
 </script>
   <script>
-    function renderAnalyticsPage() {
-      const p = getProgress();
-      const events = getEvents();
+function renderBar(label, value, max) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
 
-      document.getElementById("summary").innerHTML = `
-        <div style="font-size:20px; font-weight:900;">⭐ Stars: ${p.stars}</div>
-        <div class="muted">Streak: ${p.streakDays} days</div>
-        <div class="muted">Last star day: ${p.lastStarDay || "—"}</div>
-        <div class="muted">Total events stored: ${events.length}</div>
-        <div class="muted" style="margin-top:10px;">📖 Reading level: ${skills.reading?.level ?? 1}</div>
-        <div class="muted">💪 Challenges level: ${skills.challenges?.level ?? 1}</div>
-      `;
+  return `
+    <div style="margin-bottom:8px;">
+      <div>${label} — ${value}</div>
+      <div style="background:rgba(255,255,255,0.12); border-radius:10px;">
+        <div style="
+          width:${pct}%;
+          height:12px;
+          background:#42a5f5;
+          border-radius:10px;
+        "></div>
+      </div>
+    </div>
+  `;
+}
 
-      const rows = Object.entries(p.byModeStars || {})
-        .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
-        .join("");
+function renderAnalyticsPage() {
+  const p = getProgress();
+  const events = getEvents();
+  const stats = computeAnalytics();
+  const skills = getSkills();
 
-      document.getElementById("byMode").innerHTML =
-        `<table><tr><th>Mode</th><th>Stars</th></tr>${rows}</table>`;
+  document.getElementById("summary").innerHTML = `
+    <div style="font-size:22px; font-weight:900;">⭐ Stars: ${p.stars}</div>
+    <div class="muted">Streak: ${p.streakDays} days</div>
 
-      const recent = events.slice(-25).reverse();
-      document.getElementById("events").textContent =
-        recent.map(e => JSON.stringify(e)).join("\\n");
-    }
+    <div style="margin-top:12px;">
+      📖 Reading level: ${skills.reading?.level ?? 1}<br>
+      💪 Challenges level: ${skills.challenges?.level ?? 1}<br>
+      🔶 Shapes level: ${skills.shapes?.level ?? 1}<br>
+      🧩 Patterns level: ${skills.patterns?.level ?? 1}
+    </div>
+  `;
 
-    document.getElementById("backBtn").onclick = () => {
-      location.href = "index.html";
-    };
+  /***************
+   * TIME
+   ***************/
+  const maxTime = Math.max(...Object.values(stats.timeByMode), 1);
 
-    document.getElementById("refresh").onclick = renderAnalyticsPage;
+  let timeHTML = `<h2 style="font-size:18px;">Time Spent</h2>`;
 
-    document.getElementById("export").onclick = () => {
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        progress: getProgress(),
-        skills: getSkills(),
-        events: getEvents()
-      };
+  Object.entries(stats.timeByMode).forEach(([mode, ms]) => {
+    timeHTML += renderBar(mode, formatTime(ms), maxTime);
+  });
 
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {
-        type: "application/json"
-      });
+  document.getElementById("time").innerHTML = timeHTML;
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "workstation_analytics_export.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    };
+  /***************
+   * ACCURACY
+   ***************/
+  let accHTML = `<h2 style="font-size:18px;">Accuracy %</h2>`;
 
-    document.getElementById("reset").onclick = () => {
-      if (!confirm("This deletes ALL stored events and progress. Continue?")) return;
-      removeJSON(STORAGE_KEYS.events);
-      removeJSON(STORAGE_KEYS.progress);
-      renderAnalyticsPage();
-    };
+  Object.entries(stats.accuracyByMode).forEach(([mode, pct]) => {
+    accHTML += renderBar(mode, pct + "%", 100);
+  });
 
-    renderAnalyticsPage();
-  </script>
+  document.getElementById("accuracy").innerHTML = accHTML;
+
+  /***************
+   * STARS
+   ***************/
+  const rows = Object.entries(p.byModeStars || {})
+    .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
+    .join("");
+
+  document.getElementById("byMode").innerHTML =
+    `<table><tr><th>Mode</th><th>Stars</th></tr>${rows}</table>`;
+}
+
+document.getElementById("backBtn").onclick = () => {
+  location.href = "index.html";
+};
+
+document.getElementById("refresh").onclick = renderAnalyticsPage;
+
+renderAnalyticsPage();
+</script>
 </body>
 </html>
