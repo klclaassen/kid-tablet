@@ -369,12 +369,15 @@ if (btnNumbers) {
   };
 }
 
-document.getElementById("numbersClear").onclick = () => {
-  numbersDraw.clear();
-  if (typeof logEvent === "function") {
-    logEvent("clear_canvas", { mode: "numbers" });
-  }
-};
+const numbersClearBtn = document.getElementById("numbersClear");
+if (numbersClearBtn) {
+  numbersClearBtn.onclick = () => {
+    numbersDraw.clear();
+    if (typeof logEvent === "function") {
+      logEvent("clear_canvas", { mode: "numbers" });
+    }
+  };
+}
 
 document.getElementById("numbersDone").onclick = () => {
   const mask = buildTextMask(currentNumber, "bold 200px Andika");
@@ -1006,7 +1009,7 @@ function renderTraceWordCard(card) {
     "#42a5f5"
   );
 
-  const emojiEl = el.querySelector(".challenge-emoji");
+  const emojiEl = challengeCard.querySelector(".challenge-emoji");
   if (emojiEl) {
     emojiEl.onclick = (e) => {
       e.preventDefault();
@@ -1304,11 +1307,6 @@ function renderReadingCard(card) {
         ${renderChoiceGrid(card.choices)}
       </div>
     `;
-  }
-
-  const emojiEl = el.querySelector(".challenge-emoji");
-  if (emojiEl) {
-    emojiEl.onclick = () => speak(card.word || card.answer);
   }
 
   const emojiEl = el.querySelector(".challenge-emoji");
