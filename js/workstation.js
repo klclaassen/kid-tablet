@@ -33,34 +33,26 @@ function showScreen(key) {
   }
 }
 
-<!-- Trophy Room -->
-<div class="screen" id="trophyScreen">
-  <div class="top-row">
-    <div class="section-title">Trophy Room</div>
-    <button class="btn-back" id="trophyBackBtn">Back</button>
-  </div>
+const goMenuBtn = document.getElementById("goMenu");
+if (goMenuBtn) {
+  goMenuBtn.onclick = () => showScreen("menu");
+}
 
-  <div class="analyticsWrap">
-    <div class="analyticsCard">
-      <h2 style="margin:0 0 10px; font-size:20px;">🌟 Recommended Next</h2>
-      <div id="trophyRecommendation"></div>
-    </div>
+const menuBackBtn = document.getElementById("menuBackBtn");
+if (menuBackBtn) {
+  menuBackBtn.onclick = () => showScreen("home");
+}
 
-    <div class="analyticsCard">
-      <h2 style="margin:0 0 10px; font-size:20px;">🏅 Milestones</h2>
-      <div id="trophyMilestones"></div>
-    </div>
+const trophyBackBtn = document.getElementById("trophyBackBtn");
+if (trophyBackBtn) {
+  trophyBackBtn.onclick = () => showScreen("home");
+}
 
-    <div class="analyticsCard">
-      <h2 style="margin:0 0 10px; font-size:20px;">📈 Progress Snapshot</h2>
-      <div id="trophySnapshot"></div>
-    </div>
-  </div>
-</div>
+const btnRewards = document.getElementById("btnRewards");
+if (btnRewards) {
+  btnRewards.onclick = () => showScreen("trophy");
+}
 
-document.getElementById("goMenu").onclick = () => showScreen("menu");
-document.getElementById("menuBackBtn").onclick = () => showScreen("home");
-document.getElementById("trophyBackBtn").onclick = () => showScreen("home");
 document.querySelectorAll(".backToMenu").forEach(btn => {
   btn.onclick = () => showScreen("menu");
 });
