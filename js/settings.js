@@ -4,16 +4,6 @@ const DEFAULT_SETTINGS = {
   parentLockEnabled: true
 };
 
-function isParentPinCorrect(pin) {
-  const settings = getSettings();
-  return String(pin || "") === String(settings.parentPin || "0000");
-}
-
-function isParentLockEnabled() {
-  const settings = getSettings();
-  return settings.parentLockEnabled !== false;
-}
-
 function getSettings() {
   return loadJSON(STORAGE_KEYS.settings, DEFAULT_SETTINGS);
 }
@@ -48,22 +38,36 @@ function renderSettingsButtons() {
   lenientBtn.textContent = `Lenient: ${settings.lenient ? "ON" : "OFF"}`;
 }
 
+function isParentPinCorrect(pin) {
+  const settings = getSettings();
+  return String(pin || "") === String(settings.parentPin || "0000");
+}
+
+function isParentLockEnabled() {
+  const settings = getSettings();
+  return settings.parentLockEnabled !== false;
+}
+
+function openUnlockedSettings() {
+  const overlay = document.getElementById("settingsOverlay");
+  if (!overlay) return;
+
+  overlay.classList.add("active");
+  overlay.setAttribute("aria-hidden", "false");
+  renderSettingsButtons();
+
+  if (typeof logEvent === "function") {
+    logEvent("settings_open");
+  }
+}
+
 function openSettings() {
   const lockOverlay = document.getElementById("parentPinOverlay");
   const pinInput = document.getElementById("parentPinInput");
   const pinError = document.getElementById("parentPinError");
-  const settingsOverlay = document.getElementById("settingsOverlay");
-
-  if (!settingsOverlay) return;
 
   if (!isParentLockEnabled()) {
-    settingsOverlay.classList.add("active");
-    settingsOverlay.setAttribute("aria-hidden", "false");
-    renderSettingsButtons();
-
-    if (typeof logEvent === "function") {
-      logEvent("settings_open");
-    }
+    openUnlockedSettings();
     return;
   }
 
@@ -86,16 +90,15 @@ function openSettings() {
   }
 }
 
-function openUnlockedSettings() {
-  const settingsOverlay = document.getElementById("settingsOverlay");
-  if (!settingsOverlay) return;
+function closeSettings() {
+  const overlay = document.getElementById("settingsOverlay");
+  if (!overlay) return;
 
-  settingsOverlay.classList.add("active");
-  settingsOverlay.setAttribute("aria-hidden", "false");
-  renderSettingsButtons();
+  overlay.classList.remove("active");
+  overlay.setAttribute("aria-hidden", "true");
 
   if (typeof logEvent === "function") {
-    logEvent("settings_open");
+    logEvent("settings_close");
   }
 }
 
@@ -144,16 +147,16 @@ function wireSettingsUI() {
   const resetBtn = document.getElementById("settingsReset");
   const lenientBtn = document.getElementById("settingsLenient");
 
-  const pinOverlay = document.getElementById("parentPinOverlay");
-  const pinInput = document.getElementById("parentPinInput");
-  const pinSubmit = document.getElementById("parentPinSubmit");
-  const pinCancel = document.getElementById("parentPinCancel");
-
   const childNameBtn = document.getElementById("settingsChildName");
   const childNameEditor = document.getElementById("childNameEditor");
   const childNameInput = document.getElementById("childNameInput");
   const childNameSave = document.getElementById("childNameSave");
   const childNameCancel = document.getElementById("childNameCancel");
+
+  const pinOverlay = document.getElementById("parentPinOverlay");
+  const pinInput = document.getElementById("parentPinInput");
+  const pinSubmit = document.getElementById("parentPinSubmit");
+  const pinCancel = document.getElementById("parentPinCancel");
 
   function getProfileForSettings() {
     return loadJSON(STORAGE_KEYS.profile, {
@@ -214,7 +217,11 @@ function wireSettingsUI() {
   if (analyticsBtn) {
     analyticsBtn.onclick = () => {
       window.open("analytics.html", "_blank");
-      if (typeof logEvent === "function") logEvent("open_analytics");
+
+      if (typeof logEvent === "function") {
+        logEvent("open_analytics");
+      }
+
       closeSettings();
     };
   }
@@ -246,13 +253,18 @@ function wireSettingsUI() {
     };
   }
 
-  if (pinSubmit) {
-    pinSubmit.onclick = submitParentPin;
+  if (childNameBtn) childNameBtn.onclick = openChildNameEditor;
+  if (childNameSave) childNameSave.onclick = saveChildName;
+  if (childNameCancel) childNameCancel.onclick = closeChildNameEditor;
+
+  if (childNameInput) {
+    childNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") saveChildName();
+    });
   }
 
-  if (pinCancel) {
-    pinCancel.onclick = closeParentPin;
-  }
+  if (pinSubmit) pinSubmit.onclick = submitParentPin;
+  if (pinCancel) pinCancel.onclick = closeParentPin;
 
   if (pinOverlay) {
     pinOverlay.onclick = (e) => {
@@ -265,16 +277,6 @@ function wireSettingsUI() {
   if (pinInput) {
     pinInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") submitParentPin();
-    });
-  }
-
-  if (childNameBtn) childNameBtn.onclick = openChildNameEditor;
-  if (childNameSave) childNameSave.onclick = saveChildName;
-  if (childNameCancel) childNameCancel.onclick = closeChildNameEditor;
-
-  if (childNameInput) {
-    childNameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") saveChildName();
     });
   }
 

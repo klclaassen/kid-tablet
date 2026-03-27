@@ -358,13 +358,6 @@ function getNameWords() {
     .filter(Boolean);
 }
 
-let nameWords = getNameWords();
-let nameWordIndex = 0;
-let nameCharIndex = 0;
-
-const nameFeedback = document.getElementById("nameFeedback");
-const nameDraw = wireDrawing(document.getElementById("nameDraw"), () => "#607d8b");
-
 function buildNameHTML(word, currentIndex) {
   return word.split("").map((char, idx) => {
     let cls = "name-char";
@@ -374,8 +367,21 @@ function buildNameHTML(word, currentIndex) {
   }).join("");
 }
 
+let nameWords = getNameWords();
+let nameWordIndex = 0;
+let nameCharIndex = 0;
+const nameFeedback = document.getElementById("nameFeedback");
+const nameDraw = wireDrawing(document.getElementById("nameDraw"), () => "#607d8b");
+
 function renderName() {
+  nameWords = getNameWords();
+  if (!nameWords.length) nameWords = ["Addy"];
+
+  if (nameWordIndex >= nameWords.length) nameWordIndex = 0;
+
   const word = nameWords[nameWordIndex];
+  if (nameCharIndex >= word.length) nameCharIndex = 0;
+
   const char = word[nameCharIndex];
 
   document.getElementById("nameWord").innerHTML = buildNameHTML(word, nameCharIndex);
@@ -401,6 +407,7 @@ function advanceNameLetter() {
 }
 
 document.getElementById("btnName").onclick = () => {
+  nameWords = getNameWords();
   nameWordIndex = 0;
   nameCharIndex = 0;
   renderName();
@@ -567,7 +574,11 @@ const PATTERN_SETS = [
   { seq: ["⬛", "⬜", "⬛", "⬜"], answer: "⬛", wrong: ["⬜", "🟦", "⭐"] },
   { seq: ["🔵", "🔴", "🔵", "🔴"], answer: "🔵", wrong: ["🔴", "🟢", "🟡"] },
   { seq: ["⭐", "🌙", "⭐", "🌙"], answer: "⭐", wrong: ["🌙", "☀️", "☁️"] },
-  { seq: ["🟩", "🟨", "🟩", "🟨"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] }
+  { seq: ["🟩", "🟨", "🟩", "🟨"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] },
+  { seq: ["2", "4", "6", "?"], answer: "8", wrong: ["7", "9", "10"] },
+  { seq: ["3", "6", "9", "?"], answer: "12", wrong: ["10", "11", "15"] },
+  { seq: ["10", "9", "8", "?"], answer: "7", wrong: ["6", "9", "5"] },
+  { seq: ["🟩", "🟨", "🟨", "🟩", "🟨", "🟨", "?"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] }
 ];
 
 function shuffle(arr) {
@@ -581,7 +592,7 @@ function newPattern() {
   const feedback = document.getElementById("patternFeedback");
 
   feedback.textContent = "";
-  strip.innerHTML = p.seq.map(x => `<span>${x}</span>`).join("") + `<span> ?</span>`;
+  strip.innerHTML = p.seq.map(x => `<span>${x}</span>`).join("") + (p.seq[p.seq.length - 1] === "?" ? "" : `<span> ?</span>`);
 
   const choices = shuffle([p.answer, ...p.wrong.slice(0, 3)]);
   options.innerHTML = "";
@@ -624,12 +635,12 @@ document.getElementById("newPattern").onclick = newPattern;
 const challengeFeedback = document.getElementById("challengeFeedback");
 
 const WORD_CHALLENGES = [
-  { word: "CAR", img: "pages/boy1.png" },
+  { word: "CAR", img: "pages/truck1.png" },
   { word: "TRUCK", img: "pages/truck1.png" },
-  { word: "TURTLE", img: "pages/turtle.png" },
-  { word: "OCTOPUS", img: "pages/octopus.png" },
+  { word: "TREE", img: "pages/turtle.png" },
   { word: "DINO", img: "pages/dino1.png" },
-  { word: "ICE CREAM", img: "pages/icecreamtruck.png" }
+  { word: "TURTLE", img: "pages/turtle.png" },
+  { word: "OCTOPUS", img: "pages/octopus.png" }
 ];
 
 const NUMBER_NEXT_CHALLENGES = [
@@ -659,10 +670,6 @@ let currentChallenge = null;
 let challengeDraw = null;
 let challengeSelected = null;
 
-function shuffle(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
-
 function makeChallengeDeck() {
   const wordCard = randomItem(WORD_CHALLENGES);
   const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
@@ -674,7 +681,7 @@ function makeChallengeDeck() {
       type: "trace_word",
       word: wordCard.word,
       img: wordCard.img,
-      text: `Trace the word`
+      text: "Trace the word"
     },
     {
       type: "sequence_pick",

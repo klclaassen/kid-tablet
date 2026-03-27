@@ -3,23 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Addy Workstation</title>
+  <title>Workstation</title>
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2d1b69">
   <link rel="apple-touch-icon" href="icons/app_1.png">
-
   <link rel="stylesheet" href="css/theme.css" />
-</head>
 
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("service-worker.js")
-        .catch(err => console.error("Service worker registration failed:", err));
-    });
-  }
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .catch(err => console.error("Service worker registration failed:", err));
+      });
+    }
+  </script>
+</head>
 
 <body>
   <!-- Reward overlay -->
@@ -274,8 +273,8 @@
       <div class="challenge-card" id="challengeCard"></div>
       <div class="feedback" id="challengeFeedback"></div>
       <div class="sub-actions">
-        <button class="btn-soft" id="newChallenge">New Challenge</button>
-        <button class="btn-soft" id="challengeDone">I Did It ⭐</button>
+        <button class="btn-soft" id="newChallenge">New Card</button>
+        <button class="btn-soft" id="challengeDone">Check ⭐</button>
       </div>
     </div>
   </div>
