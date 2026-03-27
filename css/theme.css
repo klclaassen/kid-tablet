@@ -82,8 +82,10 @@ body{
     inset 0 0 0 1px rgba(255,255,255,0.10);
 
   padding:28px;
+  padding-top: 12px;
   display:none;
 }
+
 
 .screen.active{
   display:block;
@@ -311,8 +313,16 @@ canvas{
   box-shadow:0 2px 12px rgba(0,0,0,0.14);
 
   position:relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+.shape-preview canvas {
+  width: 100%;
+  height: auto;
+  max-width: 220px;
+}
 /* Reward overlay */
 
 .reward-overlay{
@@ -591,6 +601,10 @@ button:hover{
   align-items:center;
   justify-content:space-between;
   margin-bottom:22px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
 }
 
 .btn-back{
