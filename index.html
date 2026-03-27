@@ -43,6 +43,34 @@
     </div>
   </div>
 
+  <div class="reward-overlay" id="parentPinOverlay" aria-hidden="true">
+  <div class="reward-card">
+    <div class="reward-title" style="margin-top:6px;">Parent Menu</div>
+    <div class="reward-sub">Enter PIN</div>
+
+    <input
+      id="parentPinInput"
+      type="password"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      maxlength="4"
+      placeholder="0000"
+      style="width:180px; max-width:80vw; padding:14px; border-radius:16px; border:0; font-size:28px; text-align:center; letter-spacing:0.25em;"
+    />
+
+    <div
+      class="reward-sub"
+      id="parentPinError"
+      style="min-height:24px; margin-top:10px; color:#ffd54f;"
+    ></div>
+
+    <div class="sub-actions" style="margin-top:10px;">
+      <button class="btn-soft" id="parentPinSubmit">Open</button>
+      <button class="btn-soft" id="parentPinCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
   <!-- Settings -->
   <div class="reward-overlay" id="settingsOverlay" aria-hidden="true">
     <div class="reward-card">
@@ -50,9 +78,24 @@
       <div class="reward-sub">grown-up buttons</div>
 
       <div class="sub-actions" style="margin-top:10px;">
+        <button class="btn-soft" id="settingsChildName">Set Child Name</button>
         <button class="btn-soft" id="settingsAnalytics">Analytics</button>
         <button class="btn-soft" id="settingsReset">Reset Stars</button>
         <button class="btn-soft" id="settingsLenient">Lenient: OFF</button>
+      </div>
+
+      <div id="childNameEditor" class="hidden" style="margin-top:12px;">
+        <div class="reward-sub" style="margin-bottom:8px;">Name for tracing</div>
+        <input
+          id="childNameInput"
+          type="text"
+          placeholder="Enter child name"
+          style="width:min(320px, 100%); padding:12px; border-radius:14px; border:0; font-size:18px;"
+        />
+        <div class="sub-actions" style="margin-top:10px;">
+          <button class="btn-soft" id="childNameSave">Save</button>
+          <button class="btn-soft" id="childNameCancel">Cancel</button>
+        </div>
       </div>
 
       <div class="sub-actions" style="margin-top:10px;">

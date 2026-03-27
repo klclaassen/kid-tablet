@@ -1,6 +1,18 @@
 const DEFAULT_SETTINGS = {
-  lenient: false
+  lenient: false,
+  parentPin: "0000",
+  parentLockEnabled: true
 };
+
+function isParentPinCorrect(pin) {
+  const settings = getSettings();
+  return String(pin || "") === String(settings.parentPin || "0000");
+}
+
+function isParentLockEnabled() {
+  const settings = getSettings();
+  return settings.parentLockEnabled !== false;
+}
 
 function getSettings() {
   return loadJSON(STORAGE_KEYS.settings, DEFAULT_SETTINGS);
@@ -37,12 +49,49 @@ function renderSettingsButtons() {
 }
 
 function openSettings() {
-  const overlay = document.getElementById("settingsOverlay");
-  if (!overlay) return;
+  const lockOverlay = document.getElementById("parentPinOverlay");
+  const pinInput = document.getElementById("parentPinInput");
+  const pinError = document.getElementById("parentPinError");
+  const settingsOverlay = document.getElementById("settingsOverlay");
 
-  overlay.classList.add("active");
-  overlay.setAttribute("aria-hidden", "false");
+  if (!settingsOverlay) return;
 
+  if (!isParentLockEnabled()) {
+    settingsOverlay.classList.add("active");
+    settingsOverlay.setAttribute("aria-hidden", "false");
+    renderSettingsButtons();
+
+    if (typeof logEvent === "function") {
+      logEvent("settings_open");
+    }
+    return;
+  }
+
+  if (!lockOverlay) return;
+
+  lockOverlay.classList.add("active");
+  lockOverlay.setAttribute("aria-hidden", "false");
+
+  if (pinInput) {
+    pinInput.value = "";
+    pinInput.focus();
+  }
+
+  if (pinError) {
+    pinError.textContent = "";
+  }
+
+  if (typeof logEvent === "function") {
+    logEvent("parent_pin_prompt_open");
+  }
+}
+
+function openUnlockedSettings() {
+  const settingsOverlay = document.getElementById("settingsOverlay");
+  if (!settingsOverlay) return;
+
+  settingsOverlay.classList.add("active");
+  settingsOverlay.setAttribute("aria-hidden", "false");
   renderSettingsButtons();
 
   if (typeof logEvent === "function") {
@@ -50,15 +99,40 @@ function openSettings() {
   }
 }
 
-function closeSettings() {
-  const overlay = document.getElementById("settingsOverlay");
-  if (!overlay) return;
+function closeParentPin() {
+  const lockOverlay = document.getElementById("parentPinOverlay");
+  if (!lockOverlay) return;
 
-  overlay.classList.remove("active");
-  overlay.setAttribute("aria-hidden", "true");
+  lockOverlay.classList.remove("active");
+  lockOverlay.setAttribute("aria-hidden", "true");
+}
+
+function submitParentPin() {
+  const pinInput = document.getElementById("parentPinInput");
+  const pinError = document.getElementById("parentPinError");
+  const entered = pinInput ? pinInput.value.trim() : "";
+
+  if (isParentPinCorrect(entered)) {
+    closeParentPin();
+    openUnlockedSettings();
+
+    if (typeof logEvent === "function") {
+      logEvent("parent_pin_success");
+    }
+    return;
+  }
+
+  if (pinError) {
+    pinError.textContent = "Wrong PIN";
+  }
+
+  if (pinInput) {
+    pinInput.value = "";
+    pinInput.focus();
+  }
 
   if (typeof logEvent === "function") {
-    logEvent("settings_close");
+    logEvent("parent_pin_failed");
   }
 }
 
@@ -70,18 +144,69 @@ function wireSettingsUI() {
   const resetBtn = document.getElementById("settingsReset");
   const lenientBtn = document.getElementById("settingsLenient");
 
-  if (openBtn) {
-    openBtn.onclick = openSettings;
+  const pinOverlay = document.getElementById("parentPinOverlay");
+  const pinInput = document.getElementById("parentPinInput");
+  const pinSubmit = document.getElementById("parentPinSubmit");
+  const pinCancel = document.getElementById("parentPinCancel");
+
+  const childNameBtn = document.getElementById("settingsChildName");
+  const childNameEditor = document.getElementById("childNameEditor");
+  const childNameInput = document.getElementById("childNameInput");
+  const childNameSave = document.getElementById("childNameSave");
+  const childNameCancel = document.getElementById("childNameCancel");
+
+  function getProfileForSettings() {
+    return loadJSON(STORAGE_KEYS.profile, {
+      displayName: "Name",
+      childName: ""
+    });
   }
 
-  if (closeBtn) {
-    closeBtn.onclick = closeSettings;
+  function setProfileForSettings(profile) {
+    saveJSON(STORAGE_KEYS.profile, profile);
+
+    if (typeof renderAvatarBadge === "function") {
+      renderAvatarBadge();
+    }
   }
+
+  function openChildNameEditor() {
+    const profile = getProfileForSettings();
+    if (childNameInput) {
+      childNameInput.value = profile.childName || profile.displayName || "";
+      childNameInput.focus();
+      childNameInput.select();
+    }
+    if (childNameEditor) childNameEditor.classList.remove("hidden");
+  }
+
+  function closeChildNameEditor() {
+    if (childNameEditor) childNameEditor.classList.add("hidden");
+  }
+
+  function saveChildName() {
+    const raw = childNameInput ? childNameInput.value : "";
+    const clean = raw.trim();
+
+    const profile = getProfileForSettings();
+    profile.childName = clean || "Addy";
+    setProfileForSettings(profile);
+
+    if (typeof logEvent === "function") {
+      logEvent("child_name_updated", { childName: profile.childName });
+    }
+
+    closeChildNameEditor();
+  }
+
+  if (openBtn) openBtn.onclick = openSettings;
+  if (closeBtn) closeBtn.onclick = closeSettings;
 
   if (overlay) {
     overlay.onclick = (e) => {
       if (e.target.id === "settingsOverlay") {
         closeSettings();
+        closeChildNameEditor();
       }
     };
   }
@@ -89,11 +214,7 @@ function wireSettingsUI() {
   if (analyticsBtn) {
     analyticsBtn.onclick = () => {
       window.open("analytics.html", "_blank");
-
-      if (typeof logEvent === "function") {
-        logEvent("open_analytics");
-      }
-
+      if (typeof logEvent === "function") logEvent("open_analytics");
       closeSettings();
     };
   }
@@ -123,6 +244,38 @@ function wireSettingsUI() {
       toggleLenient();
       renderSettingsButtons();
     };
+  }
+
+  if (pinSubmit) {
+    pinSubmit.onclick = submitParentPin;
+  }
+
+  if (pinCancel) {
+    pinCancel.onclick = closeParentPin;
+  }
+
+  if (pinOverlay) {
+    pinOverlay.onclick = (e) => {
+      if (e.target.id === "parentPinOverlay") {
+        closeParentPin();
+      }
+    };
+  }
+
+  if (pinInput) {
+    pinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitParentPin();
+    });
+  }
+
+  if (childNameBtn) childNameBtn.onclick = openChildNameEditor;
+  if (childNameSave) childNameSave.onclick = saveChildName;
+  if (childNameCancel) childNameCancel.onclick = closeChildNameEditor;
+
+  if (childNameInput) {
+    childNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") saveChildName();
+    });
   }
 
   renderSettingsButtons();

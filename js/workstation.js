@@ -344,9 +344,24 @@ document.getElementById("numbersDone").onclick = () => {
 /***************
  * Name
  ***************/
-const NAME_WORDS = ["Addy", "Kershner"];
+function getNameWords() {
+  const profile = loadJSON(STORAGE_KEYS.profile, {
+    displayName: "Name",
+    childName: "Addy"
+  });
+
+  const raw = (profile.childName || profile.displayName || "Addy").trim();
+
+  return raw
+    .split(/\s+/)
+    .map(word => word.replace(/[^a-zA-Z'-]/g, ""))
+    .filter(Boolean);
+}
+
+let nameWords = getNameWords();
 let nameWordIndex = 0;
 let nameCharIndex = 0;
+
 const nameFeedback = document.getElementById("nameFeedback");
 const nameDraw = wireDrawing(document.getElementById("nameDraw"), () => "#607d8b");
 
@@ -360,7 +375,7 @@ function buildNameHTML(word, currentIndex) {
 }
 
 function renderName() {
-  const word = NAME_WORDS[nameWordIndex];
+  const word = nameWords[nameWordIndex];
   const char = word[nameCharIndex];
 
   document.getElementById("nameWord").innerHTML = buildNameHTML(word, nameCharIndex);
@@ -373,13 +388,13 @@ function renderName() {
 }
 
 function advanceNameLetter() {
-  const word = NAME_WORDS[nameWordIndex];
+  const word = nameWords[nameWordIndex];
   nameCharIndex++;
 
   if (nameCharIndex >= word.length) {
     nameCharIndex = 0;
     nameWordIndex++;
-    if (nameWordIndex >= NAME_WORDS.length) nameWordIndex = 0;
+    if (nameWordIndex >= nameWords.length) nameWordIndex = 0;
   }
 
   renderName();
@@ -400,7 +415,7 @@ document.getElementById("nameClear").onclick = () => {
 };
 
 document.getElementById("nameDone").onclick = () => {
-  const word = NAME_WORDS[nameWordIndex];
+  const word = nameWords[nameWordIndex];
   const char = word[nameCharIndex];
   const mask = buildTextMask(char, "bold 190px Arial");
   const passed = checkMatchAgainstMask(document.getElementById("nameDraw"), mask, "text");
