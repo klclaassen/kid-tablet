@@ -57,7 +57,7 @@
       inputmode="numeric"
       pattern="[0-9]*"
       maxlength="4"
-      placeholder="0000"
+      placeholder="****"
       style="width:180px; max-width:80vw; padding:14px; border-radius:16px; border:0; font-size:28px; text-align:center; letter-spacing:0.25em;"
     />
 
@@ -82,6 +82,7 @@
 
       <div class="sub-actions" style="margin-top:10px;">
         <button class="btn-soft" id="settingsChildName">Set Child Name</button>
+        <button class="btn-soft" id="settingsChangePin">Change PIN</button>
         <button class="btn-soft" id="settingsAnalytics">Analytics</button>
         <button class="btn-soft" id="settingsReset">Reset Stars</button>
         <button class="btn-soft" id="settingsLenient">Lenient: OFF</button>
@@ -106,6 +107,47 @@
       </div>
     </div>
   </div>
+
+  <div id="changePinEditor" class="hidden" style="margin-top:12px;">
+  <div class="reward-sub" style="margin-bottom:8px;">Change Parent PIN</div>
+
+  <input
+    id="currentPinInput"
+    type="password"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    maxlength="4"
+    placeholder="Current PIN"
+    style="width:min(220px, 100%); padding:12px; border-radius:14px; border:0; font-size:18px; margin-bottom:8px; text-align:center;"
+  />
+
+  <input
+    id="newPinInput"
+    type="password"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    maxlength="4"
+    placeholder="New 4-digit PIN"
+    style="width:min(220px, 100%); padding:12px; border-radius:14px; border:0; font-size:18px; margin-bottom:8px; text-align:center;"
+  />
+
+  <input
+    id="confirmPinInput"
+    type="password"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    maxlength="4"
+    placeholder="Confirm new PIN"
+    style="width:min(220px, 100%); padding:12px; border-radius:14px; border:0; font-size:18px; text-align:center;"
+  />
+
+  <div id="changePinError" class="reward-sub" style="min-height:24px; margin-top:10px; color:#ffd54f;"></div>
+
+  <div class="sub-actions" style="margin-top:10px;">
+    <button class="btn-soft" id="changePinSave">Save PIN</button>
+    <button class="btn-soft" id="changePinCancel">Cancel</button>
+  </div>
+</div>
 
   <!-- Menu -->
   <div class="screen" id="menuScreen">

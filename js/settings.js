@@ -147,6 +147,15 @@ function wireSettingsUI() {
   const resetBtn = document.getElementById("settingsReset");
   const lenientBtn = document.getElementById("settingsLenient");
 
+  const changePinBtn = document.getElementById("settingsChangePin");
+  const changePinEditor = document.getElementById("changePinEditor");
+  const currentPinInput = document.getElementById("currentPinInput");
+  const newPinInput = document.getElementById("newPinInput");
+  const confirmPinInput = document.getElementById("confirmPinInput");
+  const changePinSave = document.getElementById("changePinSave");
+  const changePinCancel = document.getElementById("changePinCancel");
+  const changePinError = document.getElementById("changePinError");
+
   const childNameBtn = document.getElementById("settingsChildName");
   const childNameEditor = document.getElementById("childNameEditor");
   const childNameInput = document.getElementById("childNameInput");
@@ -174,6 +183,8 @@ function wireSettingsUI() {
   }
 
   function openChildNameEditor() {
+    if (changePinEditor) changePinEditor.classList.add("hidden");
+
     const profile = getProfileForSettings();
     if (childNameInput) {
       childNameInput.value = profile.childName || profile.displayName || "";
@@ -202,14 +213,74 @@ function wireSettingsUI() {
     closeChildNameEditor();
   }
 
+  function openChangePinEditor() {
+    if (childNameEditor) childNameEditor.classList.add("hidden");
+    if (changePinEditor) changePinEditor.classList.remove("hidden");
+    if (changePinError) changePinError.textContent = "";
+
+    if (currentPinInput) currentPinInput.value = "";
+    if (newPinInput) newPinInput.value = "";
+    if (confirmPinInput) confirmPinInput.value = "";
+
+    if (currentPinInput) currentPinInput.focus();
+  }
+
+  function closeChangePinEditor() {
+    if (changePinEditor) changePinEditor.classList.add("hidden");
+    if (changePinError) changePinError.textContent = "";
+  }
+
+  function saveNewPin() {
+    const currentPin = currentPinInput ? currentPinInput.value.trim() : "";
+    const newPin = newPinInput ? newPinInput.value.trim() : "";
+    const confirmPin = confirmPinInput ? confirmPinInput.value.trim() : "";
+
+    if (!isParentPinCorrect(currentPin)) {
+      if (changePinError) changePinError.textContent = "Current PIN is wrong";
+      return;
+    }
+
+    if (!/^\d{4}$/.test(newPin)) {
+      if (changePinError) changePinError.textContent = "New PIN must be 4 digits";
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      if (changePinError) changePinError.textContent = "New PINs do not match";
+      return;
+    }
+
+    const settings = getSettings();
+    settings.parentPin = newPin;
+    setSettings(settings);
+
+    if (typeof logEvent === "function") {
+      logEvent("parent_pin_changed");
+    }
+
+    if (changePinError) changePinError.textContent = "PIN updated";
+
+    setTimeout(() => {
+      closeChangePinEditor();
+    }, 700);
+  }
+
   if (openBtn) openBtn.onclick = openSettings;
-  if (closeBtn) closeBtn.onclick = closeSettings;
+
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      closeSettings();
+      closeChildNameEditor();
+      closeChangePinEditor();
+    };
+  }
 
   if (overlay) {
     overlay.onclick = (e) => {
       if (e.target.id === "settingsOverlay") {
         closeSettings();
         closeChildNameEditor();
+        closeChangePinEditor();
       }
     };
   }
@@ -223,6 +294,8 @@ function wireSettingsUI() {
       }
 
       closeSettings();
+      closeChildNameEditor();
+      closeChangePinEditor();
     };
   }
 
@@ -260,6 +333,16 @@ function wireSettingsUI() {
   if (childNameInput) {
     childNameInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") saveChildName();
+    });
+  }
+
+  if (changePinBtn) changePinBtn.onclick = openChangePinEditor;
+  if (changePinSave) changePinSave.onclick = saveNewPin;
+  if (changePinCancel) changePinCancel.onclick = closeChangePinEditor;
+
+  if (confirmPinInput) {
+    confirmPinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") saveNewPin();
     });
   }
 
