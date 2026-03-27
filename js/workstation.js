@@ -634,6 +634,17 @@ document.getElementById("newPattern").onclick = newPattern;
  ***************/
 const challengeFeedback = document.getElementById("challengeFeedback");
 
+const COUNTING_CHALLENGES = [
+  { emoji: "🍎", label: "apples" },
+  { emoji: "⭐", label: "stars" },
+  { emoji: "⚽", label: "balls" },
+  { emoji: "🐶", label: "dogs" },
+  { emoji: "🐱", label: "cats" },
+  { emoji: "🚗", label: "cars" },
+  { emoji: "🦋", label: "butterflies" },
+  { emoji: "🌳", label: "trees" }
+];
+
 const WORD_CHALLENGES = [
   { word: "car", emoji: "🚗" },
   { word: "truck", emoji: "🚚" },
@@ -678,17 +689,45 @@ let currentChallenge = null;
 let challengeDraw = null;
 let challengeSelected = null;
 
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function makeCountingCard() {
+  const item = randomItem(COUNTING_CHALLENGES);
+  const count = randInt(3, 10);
+
+  const wrongSet = new Set();
+  while (wrongSet.size < 3) {
+    const offset = randomItem([-3, -2, -1, 1, 2, 3]);
+    const wrong = count + offset;
+    if (wrong >= 1 && wrong <= 12 && wrong !== count) {
+      wrongSet.add(String(wrong));
+    }
+  }
+
+  return {
+    type: "count_pick",
+    text: `How many ${item.label} are there?`,
+    countingEmoji: item.emoji,
+    count,
+    answer: String(count),
+    choices: shuffle([String(count), ...Array.from(wrongSet)])
+  };
+}
+
 function makeChallengeDeck() {
   const wordCard = randomItem(WORD_CHALLENGES);
   const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
   const patternCard = randomItem(HARDER_PATTERN_CHALLENGES);
   const wordPick = randomItem(WORD_PICK_CHALLENGES);
+  const countCard = makeCountingCard();
 
   return [
     {
       type: "trace_word",
       word: wordCard.word,
-      img: wordCard.img,
+      emoji: wordCard.emoji,
       text: "Trace the word"
     },
     {
@@ -710,7 +749,8 @@ function makeChallengeDeck() {
       text: wordPick.prompt,
       answer: wordPick.answer,
       choices: shuffle([wordPick.answer, ...wordPick.wrong])
-    }
+    },
+    countCard
   ];
 }
 
@@ -792,12 +832,55 @@ function renderChoiceCard(card) {
   wireChallengeChoices();
 }
 
+function makeChallengeDeck() {
+  const wordCard = randomItem(WORD_CHALLENGES);
+  const nextCard = randomItem(NUMBER_NEXT_CHALLENGES);
+  const patternCard = randomItem(HARDER_PATTERN_CHALLENGES);
+  const wordPick = randomItem(WORD_PICK_CHALLENGES);
+  const countCard = makeCountingCard();
+
+  return [
+    {
+      type: "trace_word",
+      word: wordCard.word,
+      emoji: wordCard.emoji,
+      text: "Trace the word"
+    },
+    {
+      type: "sequence_pick",
+      text: "What number comes next?",
+      seq: nextCard.seq,
+      answer: nextCard.answer,
+      choices: shuffle([nextCard.answer, ...nextCard.wrong])
+    },
+    {
+      type: "pattern_pick",
+      text: "What comes next?",
+      seq: patternCard.seq,
+      answer: patternCard.answer,
+      choices: shuffle([patternCard.answer, ...patternCard.wrong])
+    },
+    {
+      type: "word_pick",
+      text: wordPick.prompt,
+      answer: wordPick.answer,
+      choices: shuffle([wordPick.answer, ...wordPick.wrong])
+    },
+    countCard
+  ];
+}
+
 function renderChallengeCard(card) {
   challengeSelected = null;
   challengeDraw = null;
 
   if (card.type === "trace_word") {
     renderTraceWordCard(card);
+    return;
+  }
+
+  if (card.type === "count_pick") {
+    renderCountCard(card);
     return;
   }
 
@@ -899,3 +982,173 @@ document.getElementById("challengeDone").onclick = () => {
 
   checkChoiceChallenge();
 };
+
+/***************
+ * READING
+ ***************/
+const readingFeedback = document.getElementById("readingFeedback");
+
+const READING_WORDS = [
+  { word: "cat", emoji: "🐱" },
+  { word: "dog", emoji: "🐶" },
+  { word: "sun", emoji: "☀️" },
+  { word: "car", emoji: "🚗" },
+  { word: "hat", emoji: "🎩" },
+  { word: "fish", emoji: "🐟" },
+  { word: "tree", emoji: "🌳" },
+  { word: "star", emoji: "⭐" }
+];
+
+let currentReading = null;
+let readingSelected = null;
+
+/***************
+ * BUILD CARDS
+ ***************/
+function makeReadingCard() {
+  const item = randomItem(READING_WORDS);
+
+  const type = randomItem(["start_sound", "finish_word", "match_word"]);
+
+  // START SOUND
+  if (type === "start_sound") {
+    const correct = item.word[0];
+
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    const wrong = shuffle(
+      letters.filter(l => l !== correct)
+    ).slice(0, 3);
+
+    return {
+      type,
+      text: "What sound comes first?",
+      emoji: item.emoji,
+      answer: correct,
+      choices: shuffle([correct, ...wrong])
+    };
+  }
+
+  // FINISH WORD
+  if (type === "finish_word") {
+    const index = randInt(1, item.word.length - 1);
+    const missing = item.word[index];
+
+    const display =
+      item.word.slice(0, index) + "_" + item.word.slice(index + 1);
+
+    const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+    const wrong = shuffle(
+      letters.filter(l => l !== missing)
+    ).slice(0, 3);
+
+    return {
+      type,
+      text: "Finish the word",
+      emoji: item.emoji,
+      display,
+      answer: missing,
+      choices: shuffle([missing, ...wrong])
+    };
+  }
+
+  // MATCH WORD
+  const wrongWords = shuffle(
+    READING_WORDS.map(w => w.word).filter(w => w !== item.word)
+  ).slice(0, 3);
+
+  return {
+    type: "match_word",
+    text: "Which word matches?",
+    emoji: item.emoji,
+    answer: item.word,
+    choices: shuffle([item.word, ...wrongWords])
+  };
+}
+
+/***************
+ * RENDER
+ ***************/
+function renderReadingCard(card) {
+  const el = document.getElementById("readingCard");
+  readingSelected = null;
+
+  if (card.type === "finish_word") {
+    el.innerHTML = `
+      <div class="challenge-inner">
+        <div class="challenge-title">${card.text}</div>
+
+        <div class="challenge-row">
+          <div class="challenge-emoji">${card.emoji}</div>
+        </div>
+
+        <div class="challenge-row" style="font-size:48px; font-weight:900;">
+          ${card.display}
+        </div>
+
+        ${renderChoiceGrid(card.choices)}
+      </div>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="challenge-inner">
+        <div class="challenge-title">${card.text}</div>
+
+        <div class="challenge-row">
+          <div class="challenge-emoji">${card.emoji}</div>
+        </div>
+
+        ${renderChoiceGrid(card.choices)}
+      </div>
+    `;
+  }
+
+  wireReadingChoices();
+}
+
+function wireReadingChoices() {
+  document.querySelectorAll(".challenge-choice").forEach(btn => {
+    btn.onclick = () => {
+      readingSelected = btn.textContent;
+
+      document.querySelectorAll(".challenge-choice")
+        .forEach(b => b.classList.remove("selected"));
+
+      btn.classList.add("selected");
+    };
+  });
+}
+
+/***************
+ * FLOW
+ ***************/
+function newReading() {
+  currentReading = makeReadingCard();
+  renderReadingCard(currentReading);
+  readingFeedback.textContent = "";
+}
+
+function checkReading() {
+  if (!currentReading || !readingSelected) return;
+
+  const correct = String(currentReading.answer);
+  const picked = String(readingSelected);
+
+  if (picked === correct) {
+    flashFeedback(readingFeedback, "Nice reading! ⭐");
+    awardSuccess("reading");
+    setTimeout(newReading, 650);
+  } else {
+    flashFeedback(readingFeedback, "Try again!");
+  }
+}
+
+/***************
+ * BUTTONS
+ ***************/
+document.getElementById("btnReading").onclick = () => {
+  newReading();
+  showScreen("reading");
+};
+
+document.getElementById("newReading").onclick = newReading;
+document.getElementById("readingDone").onclick = checkReading;

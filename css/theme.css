@@ -763,6 +763,23 @@ button:hover{
   gap:24px;
 }
 
+.challenge-count-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  width:min(440px, 100%);
+  background:#fff;
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.14);
+}
+
+.count-emoji{
+  font-size:clamp(34px, 6vw, 52px);
+  line-height:1;
+}
+
 @media (max-width:900px){
   .activity-shell{
     gap:18px;
