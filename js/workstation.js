@@ -286,17 +286,23 @@ function newLetters() {
   }
 }
 
-document.getElementById("btnLetters").onclick = () => {
-  newLetters();
-  showScreen("letters");
-};
+const btnLetters = document.getElementById("btnLetters");
+if (btnLetters) {
+  btnLetters.onclick = () => {
+    newLetters();
+    showScreen("letters");
+  };
+}
 
-document.getElementById("lettersClear").onclick = () => {
-  lettersDraw.clear();
-  if (typeof logEvent === "function") {
-    logEvent("clear_canvas", { mode: "letters" });
-  }
-};
+const lettersClearBtn = document.getElementById("lettersClear");
+if (lettersClearBtn) {
+  lettersClearBtn.onclick = () => {
+    lettersDraw.clear();
+    if (typeof logEvent === "function") {
+      logEvent("clear_canvas", { mode: "letters" });
+    }
+  };
+}
 
 document.getElementById("lettersDone").onclick = () => {
   const targetText = currentLetterVariant === "upper" ? currentLetter.toUpperCase() : currentLetter.toLowerCase();
@@ -355,10 +361,13 @@ function newNumbers() {
   }
 }
 
-document.getElementById("btnNumbers").onclick = () => {
-  newNumbers();
-  showScreen("numbers");
-};
+const btnNumbers = document.getElementById("btnNumbers");
+if (btnNumbers) {
+  btnNumbers.onclick = () => {
+    newNumbers();
+    showScreen("numbers");
+  };
+}
 
 document.getElementById("numbersClear").onclick = () => {
   numbersDraw.clear();
@@ -450,13 +459,16 @@ function advanceNameLetter() {
   renderName();
 }
 
-document.getElementById("btnName").onclick = () => {
-  nameWords = getNameWords();
-  nameWordIndex = 0;
-  nameCharIndex = 0;
-  renderName();
-  showScreen("name");
-};
+const btnName = document.getElementById("btnName");
+if (btnName) {
+  btnName.onclick = () => {
+    nameWords = getNameWords();
+    nameWordIndex = 0;
+    nameCharIndex = 0;
+    renderName();
+    showScreen("name");
+  };
+}
 
 document.getElementById("nameClear").onclick = () => {
   nameDraw.clear();
@@ -661,10 +673,13 @@ function newShape() {
   }
 }
 
-document.getElementById("btnShapes").onclick = () => {
-  newShape();
-  showScreen("shapes");
-};
+const btnShapes = document.getElementById("btnShapes");
+if (btnShapes) {
+  btnShapes.onclick = () => {
+    newShape();
+    showScreen("shapes");
+  };
+}
 
 document.getElementById("shapesClear").onclick = () => {
   shapesDraw.clear();
@@ -777,10 +792,13 @@ function newPattern() {
   });
 }
 
-document.getElementById("btnPatterns").onclick = () => {
-  newPattern();
-  showScreen("patterns");
-};
+const btnPatterns = document.getElementById("btnPatterns");
+if (btnPatterns) {
+  btnPatterns.onclick = () => {
+    newPattern();
+    showScreen("patterns");
+  };
+}
 
 document.getElementById("newPattern").onclick = newPattern;
 
@@ -988,16 +1006,12 @@ function renderTraceWordCard(card) {
     "#42a5f5"
   );
 
-  const emojiEl = challengeCard.querySelector(".challenge-emoji");
-  if (emojiEl) {
-    emojiEl.onclick = () => speak(card.word || card.answer);
-  }
-  const emojiEl = challengeCard.querySelector(".challenge-emoji");
+  const emojiEl = el.querySelector(".challenge-emoji");
   if (emojiEl) {
     emojiEl.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      speak(card.word);
+      speak(card.word || card.answer);
     };
 
     emojiEl.oncontextmenu = (e) => e.preventDefault();
@@ -1137,10 +1151,13 @@ function checkChoiceChallenge() {
   }
 }
 
-document.getElementById("btnChallenges").onclick = () => {
-  newChallenge();
-  showScreen("challenges");
-};
+const btnChallenges = document.getElementById("btnChallenges");
+if (btnChallenges) {
+  btnChallenges.onclick = () => {
+    newChallenge();
+    showScreen("challenges");
+  };
+}
 
 document.getElementById("newChallenge").onclick = () => newChallenge();
 
@@ -1294,12 +1311,12 @@ function renderReadingCard(card) {
     emojiEl.onclick = () => speak(card.word || card.answer);
   }
 
-  const emojiEl = challengeCard.querySelector(".challenge-emoji");
+  const emojiEl = el.querySelector(".challenge-emoji");
   if (emojiEl) {
     emojiEl.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      speak(card.word);
+      speak(card.word || card.answer);
     };
 
     emojiEl.oncontextmenu = (e) => e.preventDefault();
@@ -1365,10 +1382,13 @@ function checkReading() {
   }
 }
 
-document.getElementById("btnReading").onclick = () => {
-  newReading();
-  showScreen("reading");
-};
+const btnReading = document.getElementById("btnReading");
+if (btnReading) {
+  btnReading.onclick = () => {
+    newReading();
+    showScreen("reading");
+  };
+}
 
 document.getElementById("newReading").onclick = newReading;
 document.getElementById("readingDone").onclick = checkReading;
