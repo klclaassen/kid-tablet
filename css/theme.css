@@ -677,10 +677,78 @@ button:hover{
   font-weight:900;
 }
 
-@media (min-width:700px){
+/* Portrait-friendly learning layouts */
 
-  .section-title{
-    font-size:52px;
+@media (orientation: portrait) {
+  .letters-layout,
+  .numbers-layout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "left right"
+      "center center";
+    align-items:stretch;
   }
 
+  .letters-layout .left-card,
+  .numbers-layout .left-card {
+    grid-area: left;
+    min-height: 160px;
+  }
+
+  .letters-layout .right-card,
+  .numbers-layout .right-card {
+    grid-area: right;
+    min-height: 160px;
+  }
+
+  .letters-layout .center-card,
+  .numbers-layout .center-card {
+    grid-area: center;
+    min-height: 0;
+  }
+
+  .letters-layout .canvas-wrap,
+  .numbers-layout .canvas-wrap {
+    width: min(340px, 82vw);
+    height: min(340px, 82vw);
+    margin: 0 auto;
+  }
+
+  .letters-layout canvas,
+  .numbers-layout canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .letters-layout .big-upper {
+    font-size: clamp(72px, 14vw, 120px);
+  }
+
+  .letters-layout .big-lower {
+    font-size: clamp(54px, 11vw, 86px);
+  }
+
+  .numbers-layout .big-upper {
+    font-size: clamp(76px, 15vw, 124px);
+  }
+
+  .letters-layout .emoji-big {
+    font-size: clamp(56px, 13vw, 96px);
+  }
+
+  .numbers-layout .emoji-grid {
+    font-size: clamp(28px, 7vw, 46px);
+    gap: 6px;
+  }
+}
+
+@media (max-width:900px){
+  .activity-shell{
+    gap:18px;
+  }
+
+  .shape-preview{
+    width:220px;
+    height:220px;
+  }
 }
