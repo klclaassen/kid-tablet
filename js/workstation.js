@@ -61,6 +61,24 @@ function flashFeedback(el, text, ms = 900) {
   }, ms);
 }
 
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.9;
+  utter.pitch = 1.0;
+  utter.lang = "en-US";
+  window.speechSynthesis.speak(utter);
+}
+
 function wireDrawing(drawCanvas, colorGetter, lineWidth = 18) {
   const ctx = drawCanvas.getContext("2d");
   let drawing = false;
@@ -450,10 +468,26 @@ document.getElementById("nameDone").onclick = () => {
 /***************
  * Shapes
  ***************/
-const SHAPES = ["circle", "square", "triangle", "heart", "star"];
+const SHAPE_LEVELS = {
+  1: ["circle", "square", "triangle"],
+  2: ["oval", "rectangle", "heart", "diamond"],
+  3: ["easyStar", "hexagon", "crescent", "cloud"]
+};
+
 let currentShape = "circle";
 const shapesFeedback = document.getElementById("shapesFeedback");
 const shapesDraw = wireDrawing(document.getElementById("shapesDraw"), () => "#26a69a");
+
+function getShapePool() {
+  const level = getSkill("shapes").level || 1;
+  const pool = [];
+
+  for (let i = 1; i <= level; i++) {
+    if (SHAPE_LEVELS[i]) pool.push(...SHAPE_LEVELS[i]);
+  }
+
+  return pool.length ? pool : SHAPE_LEVELS[1];
+}
 
 function drawHeart(ctx, x, y, size) {
   ctx.beginPath();
@@ -492,25 +526,71 @@ function drawShape(canvas, shape, color, alpha = 0.18, lineWidth = 18) {
 
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
+  const isPreview = canvas.id === "shapesPreview";
+  const scale = isPreview ? 0.72 : 1;
 
   if (shape === "circle") {
     ctx.beginPath();
-    ctx.arc(cx, cy, 95, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 95 * scale, 0, Math.PI * 2);
     ctx.stroke();
   } else if (shape === "square") {
-    ctx.strokeRect(cx - 95, cy - 95, 190, 190);
+    const s = 190 * scale;
+    ctx.strokeRect(cx - s / 2, cy - s / 2, s, s);
   } else if (shape === "triangle") {
     ctx.beginPath();
-    ctx.moveTo(cx, cy - 110);
-    ctx.lineTo(cx - 110, cy + 95);
-    ctx.lineTo(cx + 110, cy + 95);
+    ctx.moveTo(cx, cy - 110 * scale);
+    ctx.lineTo(cx - 110 * scale, cy + 95 * scale);
+    ctx.lineTo(cx + 110 * scale, cy + 95 * scale);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (shape === "oval") {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 120 * scale, 80 * scale, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (shape === "rectangle") {
+    const w = 240 * scale;
+    const h = 160 * scale;
+    ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+  } else if (shape === "diamond") {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 115 * scale);
+    ctx.lineTo(cx - 95 * scale, cy);
+    ctx.lineTo(cx, cy + 115 * scale);
+    ctx.lineTo(cx + 95 * scale, cy);
     ctx.closePath();
     ctx.stroke();
   } else if (shape === "heart") {
-    drawHeart(ctx, cx, cy - 70, 180);
+    drawHeart(ctx, cx, cy - 70 * scale, 180 * scale);
     ctx.stroke();
-  } else if (shape === "star") {
-    drawStar(ctx, cx, cy, 5, 110, 48);
+  } else if (shape === "easyStar") {
+    drawStar(ctx, cx, cy, 4, 110 * scale, 62 * scale);
+    ctx.stroke();
+  } else if (shape === "hexagon") {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      const x = cx + Math.cos(angle) * 105 * scale;
+      const y = cy + Math.sin(angle) * 105 * scale;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  } else if (shape === "crescent") {
+    ctx.beginPath();
+    ctx.arc(cx - 12 * scale, cy, 82 * scale, Math.PI * 0.25, Math.PI * 1.75);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx + 28 * scale, cy, 70 * scale, Math.PI * 0.35, Math.PI * 1.65, true);
+    ctx.strokeStyle = "#fff";
+    ctx.globalAlpha = 1;
+    ctx.stroke();
+  } else if (shape === "cloud") {
+    ctx.beginPath();
+    ctx.arc(cx - 60 * scale, cy + 10 * scale, 42 * scale, Math.PI * 0.9, Math.PI * 1.9);
+    ctx.arc(cx - 18 * scale, cy - 22 * scale, 48 * scale, Math.PI, Math.PI * 1.9);
+    ctx.arc(cx + 34 * scale, cy - 8 * scale, 40 * scale, Math.PI * 1.1, Math.PI * 1.95);
+    ctx.arc(cx + 72 * scale, cy + 18 * scale, 30 * scale, Math.PI * 1.1, Math.PI * 1.9);
     ctx.stroke();
   }
 
@@ -521,25 +601,43 @@ function buildShapeMask(shape) {
   const temp = document.createElement("canvas");
   temp.width = 340;
   temp.height = 340;
-  drawShape(temp, shape, "#000", 1.0, 18);
+  drawShape(temp, shape, "#000", 1.0, 20);
   return temp.getContext("2d").getImageData(0, 0, 340, 340);
 }
 
 function newShape() {
-  let next = randomItem(SHAPES);
-  while (next === currentShape && SHAPES.length > 1) next = randomItem(SHAPES);
+  const pool = getShapePool();
+  let next = randomItem(pool);
+  while (next === currentShape && pool.length > 1) next = randomItem(pool);
   currentShape = next;
 
-  document.getElementById("shapeLabel").textContent =
-    currentShape.charAt(0).toUpperCase() + currentShape.slice(1);
+  const labelMap = {
+    circle: "Circle",
+    square: "Square",
+    triangle: "Triangle",
+    oval: "Oval",
+    rectangle: "Rectangle",
+    heart: "Heart",
+    diamond: "Diamond",
+    easyStar: "Star",
+    hexagon: "Hexagon",
+    crescent: "Moon",
+    cloud: "Cloud"
+  };
 
-  drawShape(document.getElementById("shapesGuide"), currentShape, "#26a69a", 0.18, 18);
+  document.getElementById("shapeLabel").textContent = labelMap[currentShape] || currentShape;
+
+  drawShape(document.getElementById("shapesGuide"), currentShape, "#26a69a", 0.18, 20);
   drawShape(document.getElementById("shapesPreview"), currentShape, "#26a69a", 1, 14);
 
   shapesDraw.clear();
 
   if (typeof logEvent === "function") {
-    logEvent("new_item", { mode: "shapes", shape: currentShape });
+    logEvent("new_item", {
+      mode: "shapes",
+      shape: currentShape,
+      level: getSkill("shapes").level
+    });
   }
 }
 
@@ -559,8 +657,15 @@ document.getElementById("shapesDone").onclick = () => {
   const mask = buildShapeMask(currentShape);
   const passed = checkMatchAgainstMask(document.getElementById("shapesDraw"), mask, "shapes");
 
+  recordSkillResult("shapes", passed, 3);
+
   if (typeof logEvent === "function") {
-    logEvent("done_pressed", { mode: "shapes", passed, shape: currentShape });
+    logEvent("done_pressed", {
+      mode: "shapes",
+      passed,
+      shape: currentShape,
+      level: getSkill("shapes").level
+    });
   }
 
   if (passed) {
@@ -576,35 +681,52 @@ document.getElementById("shapesDone").onclick = () => {
 /***************
  * Patterns
  ***************/
-const PATTERN_SETS = [
-  { seq: ["⬛", "⬜", "⬛", "⬜"], answer: "⬛", wrong: ["⬜", "🟦", "⭐"] },
-  { seq: ["🔵", "🔴", "🔵", "🔴"], answer: "🔵", wrong: ["🔴", "🟢", "🟡"] },
-  { seq: ["⭐", "🌙", "⭐", "🌙"], answer: "⭐", wrong: ["🌙", "☀️", "☁️"] },
-  { seq: ["🟩", "🟨", "🟩", "🟨"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] },
-  { seq: ["2", "4", "6", "?"], answer: "8", wrong: ["7", "9", "10"] },
-  { seq: ["3", "6", "9", "?"], answer: "12", wrong: ["10", "11", "15"] },
-  { seq: ["10", "9", "8", "?"], answer: "7", wrong: ["6", "9", "5"] },
-  { seq: ["🟩", "🟨", "🟨", "🟩", "🟨", "🟨", "?"], answer: "🟩", wrong: ["🟨", "🟦", "🟥"] }
-];
+const PATTERN_LEVELS = {
+  1: [
+    { seq: ["⬛", "⬜", "⬛", "?"], answer: "⬜", wrong: ["⬛", "🟦", "⭐"] },
+    { seq: ["🔵", "🔴", "🔵", "?"], answer: "🔴", wrong: ["🔵", "🟢", "🟡"] },
+    { seq: ["1", "2", "1", "?"], answer: "2", wrong: ["1", "3", "4"] }
+  ],
+  2: [
+    { seq: ["⭐", "⭐", "🌙", "⭐", "⭐", "?"], answer: "🌙", wrong: ["⭐", "☀️", "☁️"] },
+    { seq: ["🟩", "🟨", "🟨", "🟩", "?"], answer: "🟨", wrong: ["🟩", "🟦", "🟥"] },
+    { seq: ["2", "4", "6", "?"], answer: "8", wrong: ["7", "9", "10"] }
+  ],
+  3: [
+    { seq: ["3", "6", "9", "?"], answer: "12", wrong: ["10", "11", "15"] },
+    { seq: ["10", "9", "8", "?"], answer: "7", wrong: ["6", "9", "5"] },
+    { seq: ["🟪", "🟧", "🟪", "🟧", "🟪", "?"], answer: "🟧", wrong: ["🟪", "⬜", "🟩"] }
+  ]
+};
 
-function shuffle(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
+function getPatternPool() {
+  const level = getSkill("patterns").level || 1;
+  const pool = [];
+  for (let i = 1; i <= level; i++) {
+    if (PATTERN_LEVELS[i]) pool.push(...PATTERN_LEVELS[i]);
+  }
+  return pool.length ? pool : PATTERN_LEVELS[1];
 }
 
 function newPattern() {
-  const p = randomItem(PATTERN_SETS);
+  const p = randomItem(getPatternPool());
   const strip = document.getElementById("patternStrip");
   const options = document.getElementById("patternOptions");
   const feedback = document.getElementById("patternFeedback");
 
   feedback.textContent = "";
-  strip.innerHTML = p.seq.map(x => `<span>${x}</span>`).join("") + (p.seq[p.seq.length - 1] === "?" ? "" : `<span> ?</span>`);
+  strip.innerHTML = p.seq.map(x => `<span>${x}</span>`).join("");
 
   const choices = shuffle([p.answer, ...p.wrong.slice(0, 3)]);
   options.innerHTML = "";
 
   if (typeof logEvent === "function") {
-    logEvent("new_item", { mode: "patterns", seq: p.seq });
+    logEvent("new_item", {
+      mode: "patterns",
+      seq: p.seq,
+      answer: p.answer,
+      level: getSkill("patterns").level
+    });
   }
 
   choices.forEach(choice => {
@@ -612,11 +734,18 @@ function newPattern() {
     d.className = "pattern-option";
     d.textContent = choice;
     d.onclick = () => {
+      const passed = choice === p.answer;
+      recordSkillResult("patterns", passed, 3);
+
       if (typeof logEvent === "function") {
-        logEvent("pattern_choice", { choice, correct: choice === p.answer });
+        logEvent("pattern_choice", {
+          choice,
+          correct: passed,
+          level: getSkill("patterns").level
+        });
       }
 
-      if (choice === p.answer) {
+      if (passed) {
         feedback.textContent = "Nice pattern! ⭐";
         awardSuccess("patterns");
         setTimeout(newPattern, 650);
@@ -694,10 +823,6 @@ const WORD_PICK_CHALLENGES = [
 let currentChallenge = null;
 let challengeDraw = null;
 let challengeSelected = null;
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 function makeCountingCard(level) {
   const item = randomItem(COUNTING_CHALLENGES);
@@ -820,7 +945,7 @@ function renderTraceWordCard(card) {
       <div class="challenge-title">Trace the word</div>
 
       <div class="challenge-row">
-        <div class="challenge-emoji">${card.emoji}</div>
+        <div class="challenge-emoji challenge-emoji-btn">${card.emoji}</button></div>
 
         <div class="challenge-canvas-wrap">
           <canvas id="challengeGuide" class="challenge-guide" width="340" height="340"></canvas>
@@ -840,6 +965,11 @@ function renderTraceWordCard(card) {
     font,
     "#42a5f5"
   );
+
+  const emojiEl = challengeCard.querySelector(".challenge-emoji");
+  if (emojiEl) {
+    emojiEl.onclick = () => speak(card.word || card.answer);
+  }
 
   challengeDraw = wireDrawing(
     document.getElementById("challengeDraw"),
@@ -996,7 +1126,7 @@ document.getElementById("challengeDone").onclick = () => {
 };
 
 /***************
- * READING
+ * Reading
  ***************/
 const readingFeedback = document.getElementById("readingFeedback");
 
@@ -1046,6 +1176,7 @@ function makeReadingCard() {
       type,
       text: "What sound comes first?",
       emoji: item.emoji,
+      word: item.word,
       answer: correct,
       choices: shuffle([correct, ...wrong])
     };
@@ -1066,6 +1197,7 @@ function makeReadingCard() {
       type,
       text: "Finish the word",
       emoji: item.emoji,
+      word: item.word,
       display,
       answer: missing,
       choices: shuffle([missing, ...wrong])
@@ -1080,6 +1212,7 @@ function makeReadingCard() {
     type: "match_word",
     text: "Which word matches?",
     emoji: item.emoji,
+    word: item.word,
     answer: item.word,
     choices: shuffle([item.word, ...wrongWords])
   };
@@ -1117,6 +1250,11 @@ function renderReadingCard(card) {
         ${renderChoiceGrid(card.choices)}
       </div>
     `;
+  }
+
+  const emojiEl = el.querySelector(".challenge-emoji");
+  if (emojiEl) {
+    emojiEl.onclick = () => speak(card.word || card.answer);
   }
 
   wireReadingChoices();

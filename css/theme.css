@@ -17,47 +17,18 @@
 
 /* Reset */
 
-
 *{
   box-sizing:border-box;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-}
-
-.back-button {
-  z-index: 2;
-}
-
-.avatar-button {
-  z-index: 1;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-html,body{
+html,
+body{
   margin:0;
   height:100%;
   font-family:Arial, Helvetica, sans-serif;
   background:linear-gradient(180deg,var(--bg2) 0%, var(--bg) 100%);
   color:var(--text);
 }
-
-/* Layout */
 
 body{
   display:flex;
@@ -68,24 +39,53 @@ body{
   overflow:hidden;
 }
 
+.hidden{
+  display:none !important;
+}
+
+/* Generic layout helpers */
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+}
+
+.back-button{
+  z-index:2;
+}
+
+.avatar-button{
+  z-index:1;
+}
+
+.container{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+
+.content{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+}
+
 /* Screens */
 
 .screen{
   width:min(1100px,96vw);
   min-height:min(760px,92vh);
-
   background:rgba(255,255,255,0.08);
   border-radius:32px;
-
   box-shadow:
     var(--shadow),
     inset 0 0 0 1px rgba(255,255,255,0.10);
-
   padding:28px;
-  padding-top: 12px;
+  padding-top:12px;
   display:none;
 }
-
 
 .screen.active{
   display:block;
@@ -100,6 +100,8 @@ body{
   justify-content:center;
   align-items:center;
   text-align:center;
+  gap:18px;
+  margin-top:28px;
 }
 
 .home-title{
@@ -111,7 +113,11 @@ body{
 .home-sub{
   font-size:clamp(18px,2.8vw,28px);
   color:var(--muted);
-  margin-bottom:30px;
+  margin-bottom:12px;
+}
+
+.home-wrap button{
+  width:260px;
 }
 
 /* Buttons */
@@ -119,34 +125,27 @@ body{
 button{
   border:none;
   border-radius:22px;
-
   padding:0.85em 1.25em;
-
   font-size:clamp(18px,2.8vw,28px);
   font-weight:900;
-
   color:white;
   cursor:pointer;
-
   box-shadow:
     0 6px 14px rgba(0,0,0,0.18),
     inset 0 0 0 2px rgba(255,255,255,0.12);
-
   transition:transform .12s ease;
   user-select:none;
 }
 
 button:active{
-  transform:scale(.97);
+  transform:scale(.96);
 }
 
-.btn-back{
-  background:rgba(255,255,255,0.18);
-  font-size:18px;
-  padding:.7em 1em;
-  border-radius:16px;
+button:hover{
+  transform:translateY(-2px);
 }
 
+.btn-back,
 .btn-soft{
   background:rgba(255,255,255,0.18);
   font-size:18px;
@@ -155,8 +154,6 @@ button:active{
   font-weight:900;
 }
 
-/* Activity colors */
-
 .btn-letters{background:var(--letters);}
 .btn-numbers{background:var(--numbers);}
 .btn-name{background:var(--name);}
@@ -164,23 +161,27 @@ button:active{
 .btn-patterns{background:var(--patterns);}
 .btn-challenges{background:var(--challenges);}
 
+.btn-emoji{
+  font-size:clamp(28px, 4vw, 40px);
+  margin-right:8px;
+  display:inline-block;
+  transform:translateY(2px);
+  vertical-align:middle;
+}
+
 /* Top badges */
 
 .badge{
   position:fixed;
   top:18px;
   z-index:50;
-
   background:rgba(255,255,255,0.16);
   backdrop-filter:blur(6px);
-
   border-radius:22px;
   padding:10px 16px 12px;
-
   box-shadow:
     0 4px 16px rgba(0,0,0,0.16),
     inset 0 0 0 1px rgba(255,255,255,0.14);
-
   text-align:center;
   user-select:none;
 }
@@ -213,14 +214,11 @@ button:active{
 .avatar-badge{
   right:150px;
   min-width:74px;
-
   padding:8px 12px 10px;
-
   display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-
   cursor:pointer;
 }
 
@@ -233,6 +231,47 @@ button:active{
   font-weight:900;
 }
 
+/* Section header */
+
+.top-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:22px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.section-title{
+  font-size:44px;
+  font-weight:900;
+  letter-spacing:.5px;
+  line-height:1.1;
+}
+
+/* Menu */
+
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:18px;
+  max-width:720px;
+  margin:24px auto;
+}
+
+.menu-grid button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:90px;
+  font-size:clamp(18px, 2.6vw, 26px);
+  font-weight:900;
+  text-align:center;
+  border-radius:18px;
+}
+
 /* Cards */
 
 .center-card,
@@ -240,12 +279,10 @@ button:active{
 .right-card{
   border-radius:28px;
   padding:18px;
-
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
-
   background:rgba(255,255,255,0.12);
 }
 
@@ -288,122 +325,7 @@ canvas{
   border-radius:24px;
 }
 
-/* Emoji grid */
-
-.emoji-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-
-  justify-items:center;
-  align-items:center;
-
-  font-size:48px;
-}
-
-/* Shape preview */
-
-.shape-preview{
-  width:260px;
-  height:260px;
-
-  background:white;
-  border-radius:24px;
-
-  box-shadow:0 2px 12px rgba(0,0,0,0.14);
-
-  position:relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.shape-preview canvas {
-  width: 100%;
-  height: auto;
-  max-width: 220px;
-}
-/* Reward overlay */
-
-.reward-overlay{
-  position:fixed;
-  inset:0;
-
-  display:none;
-  align-items:center;
-  justify-content:center;
-
-  z-index:999;
-
-  background:rgba(8,10,24,0.55);
-  backdrop-filter:blur(2px);
-
-  padding:18px;
-}
-
-.reward-overlay.active{
-  display:flex;
-}
-
-.reward-card{
-  width:min(560px,94vw);
-
-  border-radius:30px;
-  background:rgba(255,255,255,0.14);
-
-  padding:22px 20px 18px;
-
-  text-align:center;
-
-  box-shadow:
-    0 18px 40px rgba(0,0,0,0.28),
-    inset 0 0 0 1px rgba(255,255,255,0.12);
-}
-
-.reward-emoji{
-  font-size:96px;
-  margin-bottom:8px;
-}
-
-.reward-title{
-  font-size:34px;
-  font-weight:900;
-}
-
-.reward-sub{
-  font-size:18px;
-  opacity:.9;
-  margin-bottom:14px;
-}
-
-/* Responsive */
-
-@media (max-width:900px){
-
-  .activity-shell{
-    grid-template-columns:1fr;
-  }
-
-  .shape-preview{
-    width:220px;
-    height:220px;
-  }
-
-}
-
-@media (max-width:700px){
-
-  .avatar-badge{
-    right:18px;
-    top:82px;
-  }
-
-  .clock-badge{
-    top:18px;
-    right:18px;
-  }
-
-}
+/* Common activity bits */
 
 .big-pair{
   display:flex;
@@ -435,6 +357,15 @@ canvas{
 .emoji-big{
   font-size:98px;
   line-height:1.05;
+}
+
+.emoji-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  justify-items:center;
+  align-items:center;
+  font-size:48px;
 }
 
 .number-emoji-cell{
@@ -470,10 +401,29 @@ canvas{
 }
 
 .shape-label{
-  font-size:44px;
+  font-size:clamp(28px, 4vw, 42px);
   font-weight:900;
+  text-align:center;
   text-transform:capitalize;
   white-space:nowrap;
+}
+
+.shape-preview{
+  width:260px;
+  height:260px;
+  background:white;
+  border-radius:24px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.14);
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.shape-preview canvas{
+  width:100%;
+  height:auto;
+  max-width:220px;
 }
 
 .sub-actions{
@@ -483,6 +433,62 @@ canvas{
   justify-content:center;
   flex-wrap:wrap;
 }
+
+.feedback{
+  margin-top:14px;
+  min-height:1.4em;
+  font-weight:900;
+  color:#ffd8e5;
+  text-align:center;
+  font-size:22px;
+}
+
+/* Reward overlay */
+
+.reward-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+  background:rgba(8,10,24,0.55);
+  backdrop-filter:blur(2px);
+  padding:18px;
+}
+
+.reward-overlay.active{
+  display:flex;
+}
+
+.reward-card{
+  width:min(560px,94vw);
+  border-radius:30px;
+  background:rgba(255,255,255,0.14);
+  padding:22px 20px 18px;
+  text-align:center;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.28),
+    inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.reward-emoji{
+  font-size:96px;
+  margin-bottom:8px;
+}
+
+.reward-title{
+  font-size:34px;
+  font-weight:900;
+}
+
+.reward-sub{
+  font-size:18px;
+  opacity:.9;
+  margin-bottom:14px;
+}
+
+/* Patterns */
 
 .pattern-strip{
   display:flex;
@@ -505,22 +511,20 @@ canvas{
   background:rgba(255,255,255,0.14);
   border-radius:20px;
   padding:20px;
-  font-size:56px;
   cursor:pointer;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10);
   user-select:none;
   text-align:center;
+  min-width:88px;
+  min-height:88px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:clamp(28px, 5vw, 44px);
   font-weight:900;
 }
 
-.feedback{
-  margin-top:14px;
-  min-height:1.4em;
-  font-weight:900;
-  color:#ffd8e5;
-  text-align:center;
-  font-size:22px;
-}
+/* Challenge / Reading shared */
 
 .challenge-card{
   width:min(680px, 100%);
@@ -536,82 +540,6 @@ canvas{
   font-size:clamp(26px, 4vw, 42px);
   font-weight:900;
   line-height:1.25;
-}
-
-.home-wrap{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:18px;
-  margin-top:28px;
-}
-
-.home-wrap button{
-  width:260px;
-}
-
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  gap:18px;
-  max-width:720px;
-  margin:24px auto;
-}
-
-.menu-grid button{
-  height:90px;
-  font-size:22px;
-  font-weight:900;
-  border-radius:18px;
-}
-
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(2, 1fr);
-  gap:18px;
-  max-width:720px;
-  margin:24px auto;
-}
-
-.menu-grid button{
-  height:90px;
-  font-size:22px;
-  font-weight:900;
-  border-radius:18px;
-}
-
-button:active{
-  transform:scale(.96);
-}
-
-/* For desktop testing */
-button:hover{
-  transform:translateY(-2px);
-}
-
-.section-title{
-  font-size:44px;
-  font-weight:900;
-  letter-spacing:.5px;
-  line-height:1.1;
-}
-
-.top-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:22px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-
-}
-
-.btn-back{
-  font-size:18px;
-  font-weight:800;
-  padding:10px 16px;
-  border-radius:14px;
 }
 
 .challenge-inner{
@@ -630,13 +558,36 @@ button:hover{
 
 .challenge-row{
   display:flex;
-  gap:18px;
+  gap:24px;
   align-items:center;
   justify-content:center;
   flex-wrap:wrap;
   width:100%;
 }
 
+.challenge-emoji{
+  font-size:clamp(64px, 12vw, 120px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:140px;
+  height:140px;
+  background:#fff;
+  border-radius:24px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.14);
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.challenge-emoji-btn{
+  border: none;
+  background: #fff;
+  padding: 0;
+  margin: 0;
+}
 .challenge-image{
   width:170px;
   height:170px;
@@ -658,6 +609,12 @@ button:hover{
   box-shadow:0 2px 12px rgba(0,0,0,0.14);
 }
 
+.challenge-word-label{
+  font-size:32px;
+  font-weight:900;
+  text-transform:none;
+}
+
 .challenge-choice-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -669,12 +626,16 @@ button:hover{
   background:rgba(255,255,255,0.14);
   border-radius:20px;
   padding:18px;
-  font-size:clamp(24px, 4vw, 40px);
   cursor:pointer;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.10);
   text-align:center;
+  font-size:clamp(24px, 4vw, 40px);
   font-weight:900;
   user-select:none;
+  min-height:88px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .challenge-choice.selected{
@@ -690,91 +651,6 @@ button:hover{
   flex-wrap:wrap;
   font-size:clamp(30px, 5vw, 54px);
   font-weight:900;
-}
-
-/* Portrait-friendly learning layouts */
-
-@media (orientation: portrait) {
-  .letters-layout,
-  .numbers-layout {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "left right"
-      "center center";
-    align-items:stretch;
-  }
-
-  .letters-layout .left-card,
-  .numbers-layout .left-card {
-    grid-area: left;
-    min-height: 160px;
-  }
-
-  .letters-layout .right-card,
-  .numbers-layout .right-card {
-    grid-area: right;
-    min-height: 160px;
-  }
-
-  .letters-layout .center-card,
-  .numbers-layout .center-card {
-    grid-area: center;
-    min-height: 0;
-  }
-
-  .letters-layout .canvas-wrap,
-  .numbers-layout .canvas-wrap {
-    width: min(340px, 82vw);
-    height: min(340px, 82vw);
-    margin: 0 auto;
-  }
-
-  .letters-layout canvas,
-  .numbers-layout canvas {
-    width: 100%;
-    height: 100%;
-  }
-
-  .letters-layout .big-upper {
-    font-size: clamp(72px, 14vw, 120px);
-  }
-
-  .letters-layout .big-lower {
-    font-size: clamp(54px, 11vw, 86px);
-  }
-
-  .numbers-layout .big-upper {
-    font-size: clamp(76px, 15vw, 124px);
-  }
-
-  .letters-layout .emoji-big {
-    font-size: clamp(56px, 13vw, 96px);
-  }
-
-  .numbers-layout .emoji-grid {
-    font-size: clamp(28px, 7vw, 46px);
-    gap: 6px;
-  }
-}
-
-.hidden{
-  display:none !important;
-}
-
-.challenge-emoji{
-  font-size: clamp(64px, 12vw, 120px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:140px;
-  height:140px;
-  background:#fff;
-  border-radius:24px;
-  box-shadow:0 2px 12px rgba(0,0,0,0.14);
-}
-
-.challenge-row{
-  gap:24px;
 }
 
 .challenge-count-row{
@@ -794,12 +670,14 @@ button:hover{
   line-height:1;
 }
 
-.btn-emoji{
-  font-size: 28px;
-  margin-right: 6px;
-  vertical-align: middle;
-  font-size: clamp(28px, 4vw, 40px);
+/* Avatar/top bar overlap helper */
+
+body.avatar-page,
+#avatarScreen{
+  padding-top:80px;
 }
+
+/* Responsive */
 
 @media (max-width:900px){
   .activity-shell{
@@ -809,5 +687,82 @@ button:hover{
   .shape-preview{
     width:220px;
     height:220px;
+  }
+}
+
+@media (max-width:700px){
+  .avatar-badge{
+    right:18px;
+    top:82px;
+  }
+
+  .clock-badge{
+    top:18px;
+    right:18px;
+  }
+}
+
+@media (orientation: portrait) {
+  .letters-layout,
+  .numbers-layout {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "left right"
+      "center center";
+    gap:18px;
+    align-items:stretch;
+  }
+
+  .letters-layout .left-card,
+  .numbers-layout .left-card {
+    grid-area:left;
+    min-height:160px;
+  }
+
+  .letters-layout .right-card,
+  .numbers-layout .right-card {
+    grid-area:right;
+    min-height:160px;
+  }
+
+  .letters-layout .center-card,
+  .numbers-layout .center-card {
+    grid-area:center;
+    min-height:0;
+  }
+
+  .letters-layout .canvas-wrap,
+  .numbers-layout .canvas-wrap {
+    width:min(340px, 82vw);
+    height:min(340px, 82vw);
+    margin:0 auto;
+  }
+
+  .letters-layout canvas,
+  .numbers-layout canvas {
+    width:100%;
+    height:100%;
+  }
+
+  .letters-layout .big-upper {
+    font-size:clamp(72px, 14vw, 120px);
+  }
+
+  .letters-layout .big-lower {
+    font-size:clamp(54px, 11vw, 86px);
+  }
+
+  .numbers-layout .big-upper {
+    font-size:clamp(76px, 15vw, 124px);
+  }
+
+  .letters-layout .emoji-big {
+    font-size:clamp(56px, 13vw, 96px);
+  }
+
+  .numbers-layout .emoji-grid {
+    font-size:clamp(28px, 7vw, 46px);
+    gap:6px;
   }
 }
