@@ -85,46 +85,24 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = null;
 
   document.addEventListener("DOMContentLoaded", () => {
-    let history = [];
+  let history = [];
 
-    const libraryView = document.getElementById("libraryView");
-    const colorView = document.getElementById("colorView");
-    const grid = document.getElementById("pageGrid");
-    const emptyState = document.getElementById("emptyState");
-    const starsEl = document.getElementById("shopStars");
+  const libraryView = document.getElementById("libraryView");
+  const colorView = document.getElementById("colorView");
+  const grid = document.getElementById("pageGrid");
+  const emptyState = document.getElementById("emptyState");
+  const starsEl = document.getElementById("shopStars");
 
-    const draw = document.getElementById("colorLayer");
-    const dctx = draw.getContext("2d");
-    const previewLayer = document.getElementById("previewLayer");
-    const pctx = previewLayer.getContext("2d");
-    const lineArtImg = document.getElementById("lineArtImg");
+  const draw = document.getElementById("colorLayer");
+  const dctx = draw.getContext("2d");
+  const previewLayer = document.getElementById("previewLayer");
+  const pctx = previewLayer.getContext("2d");
+  const lineArtImg = document.getElementById("lineArtImg");
 
-    const eraserBtn = document.getElementById("eraser");
-    const clearBtn = document.getElementById("clear");
-    const undoBtn = document.getElementById("undo");
-    const pal = document.getElementById("palette");
-
-    function saveHistory() {
-      history.push(draw.toDataURL("image/png"));
-      if (history.length > 20) history.shift();
-    }
-
-    function restoreHistory() {
-      const last = history.pop();
-      if (!last) return;
-
-      const img = new Image();
-      img.onload = () => {
-        dctx.clearRect(0, 0, draw.width, draw.height);
-        dctx.drawImage(img, 0, 0, draw.width, draw.height);
-        if (currentPage) saveDrawing(currentPage.id, draw);
-      };
-      img.src = last;
-    }
-
-    if (undoBtn) {
-      undoBtn.onclick = restoreHistory;
-    }
+  const eraserBtn = document.getElementById("eraser");
+  const clearBtn = document.getElementById("clear");
+  const undoBtn = document.getElementById("undo");
+  const pal = document.getElementById("palette");
 
   let currentColor = COLORS[0];
   let currentLineWidth = 22;
@@ -135,7 +113,32 @@ document.addEventListener("DOMContentLoaded", () => {
   let firstSwatchBtn = null;
   let currentPage = null;
 
-  document.getElementById("backToLibrary").onclick = showLibrary;
+  function saveHistory() {
+    history.push(draw.toDataURL("image/png"));
+    if (history.length > 20) history.shift();
+  }
+
+  function restoreHistory() {
+    const last = history.pop();
+    if (!last) return;
+
+    const img = new Image();
+    img.onload = () => {
+      dctx.clearRect(0, 0, draw.width, draw.height);
+      dctx.drawImage(img, 0, 0, draw.width, draw.height);
+      if (currentPage) saveDrawing(currentPage.id, draw);
+    };
+    img.src = last;
+  }
+
+  if (undoBtn) {
+    undoBtn.onclick = restoreHistory;
+  }
+
+    const backToLibraryBtn = document.getElementById("backToLibrary");
+  if (backToLibraryBtn) {
+    backToLibraryBtn.onclick = showLibrary;
+  }
 
   function updateStars() {
     if (!starsEl) return;
@@ -354,22 +357,26 @@ document.addEventListener("DOMContentLoaded", () => {
   draw.addEventListener("touchend", end);
   draw.addEventListener("touchcancel", end);
 
-  eraserBtn.onclick = () => {
-    setEraser(true);
-    selectSwatch(null);
-  };
+  if (eraserBtn) {
+    eraserBtn.onclick = () => {
+      setEraser(true);
+      selectSwatch(null);
+    };
+  }
 
-  clearBtn.onclick = () => {
-    dctx.clearRect(0, 0, draw.width, draw.height);
-    dctx.globalCompositeOperation = "source-over";
-    setEraser(false);
-    currentColor = COLORS[0];
-    currentLineWidth = 22;
-    selectSwatch(firstSwatchBtn);
-    selectSizeButton(document.querySelector('.sizeBtn[data-size="22"]'));
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      dctx.clearRect(0, 0, draw.width, draw.height);
+      dctx.globalCompositeOperation = "source-over";
+      setEraser(false);
+      currentColor = COLORS[0];
+      currentLineWidth = 22;
+      selectSwatch(firstSwatchBtn);
+      selectSizeButton(document.querySelector('.sizeBtn[data-size="22"]'));
 
-    if (currentPage) saveDrawing(currentPage.id, draw);
-  };
+      if (currentPage) saveDrawing(currentPage.id, draw);
+    };
+  }
 
   lineArtImg.onerror = () => {
     console.error("Failed to load full-size coloring image:", lineArtImg.src);

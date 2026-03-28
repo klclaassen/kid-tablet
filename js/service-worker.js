@@ -1,4 +1,4 @@
-const CACHE_NAME = "addy-app-v2.6";
+const CACHE_NAME = "addy-app-v2.7";
 
 const URLS_TO_CACHE = [
   "./",
