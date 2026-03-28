@@ -83,44 +83,48 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastY = 0;
   let firstSwatchBtn = null;
   let currentPage = null;
-  let history = [];
 
-  function saveHistory() {
-    history.push(draw.toDataURL("image/png"));
-    if (history.length > 20) history.shift();
-  }
+  document.addEventListener("DOMContentLoaded", () => {
+    let history = [];
 
-  function restoreHistory() {
-    const last = history.pop();
-    if (!last) return;
+    const libraryView = document.getElementById("libraryView");
+    const colorView = document.getElementById("colorView");
+    const grid = document.getElementById("pageGrid");
+    const emptyState = document.getElementById("emptyState");
+    const starsEl = document.getElementById("shopStars");
 
-    const img = new Image();
-    img.onload = () => {
-      dctx.clearRect(0, 0, draw.width, draw.height);
-      dctx.drawImage(img, 0, 0, draw.width, draw.height);
-      if (currentPage) saveDrawing(currentPage.id, draw);
-    };
-    img.src = last;
-  }
+    const draw = document.getElementById("colorLayer");
+    const dctx = draw.getContext("2d");
+    const previewLayer = document.getElementById("previewLayer");
+    const pctx = previewLayer.getContext("2d");
+    const lineArtImg = document.getElementById("lineArtImg");
 
-  if (undoBtn) {
-    undoBtn.onclick = restoreHistory;
-  }
+    const eraserBtn = document.getElementById("eraser");
+    const clearBtn = document.getElementById("clear");
+    const undoBtn = document.getElementById("undo");
+    const pal = document.getElementById("palette");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const libraryView = document.getElementById("libraryView");
-  const colorView = document.getElementById("colorView");
-  const grid = document.getElementById("pageGrid");
-  const emptyState = document.getElementById("emptyState");
-  const starsEl = document.getElementById("shopStars");
+    function saveHistory() {
+      history.push(draw.toDataURL("image/png"));
+      if (history.length > 20) history.shift();
+    }
 
-  const draw = document.getElementById("colorLayer");
-  const dctx = draw.getContext("2d");
-  const lineArtImg = document.getElementById("lineArtImg");
+    function restoreHistory() {
+      const last = history.pop();
+      if (!last) return;
 
-  const eraserBtn = document.getElementById("eraser");
-  const clearBtn = document.getElementById("clear");
-  const pal = document.getElementById("palette");
+      const img = new Image();
+      img.onload = () => {
+        dctx.clearRect(0, 0, draw.width, draw.height);
+        dctx.drawImage(img, 0, 0, draw.width, draw.height);
+        if (currentPage) saveDrawing(currentPage.id, draw);
+      };
+      img.src = last;
+    }
+
+    if (undoBtn) {
+      undoBtn.onclick = restoreHistory;
+    }
 
   let currentColor = COLORS[0];
   let currentLineWidth = 22;
