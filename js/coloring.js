@@ -58,33 +58,6 @@ function loadDrawing(pageId, ctx, canvas, callback) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const libraryView = document.getElementById("libraryView");
-  const colorView = document.getElementById("colorView");
-  const grid = document.getElementById("pageGrid");
-  const emptyState = document.getElementById("emptyState");
-  const starsEl = document.getElementById("shopStars");
-
-  const draw = document.getElementById("colorLayer");
-  const dctx = draw.getContext("2d");
-  const previewLayer = document.getElementById("previewLayer");
-  const pctx = previewLayer.getContext("2d");
-  const lineArtImg = document.getElementById("lineArtImg");
-
-  const eraserBtn = document.getElementById("eraser");
-  const clearBtn = document.getElementById("clear");
-  const undoBtn = document.getElementById("undo");
-  const pal = document.getElementById("palette");
-
-  let currentColor = COLORS[0];
-  let currentLineWidth = 22;
-  let erasing = false;
-  let drawing = false;
-  let lastX = 0;
-  let lastY = 0;
-  let firstSwatchBtn = null;
-  let currentPage = null;
-
-  document.addEventListener("DOMContentLoaded", () => {
   let history = [];
 
   const libraryView = document.getElementById("libraryView");
@@ -94,15 +67,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const starsEl = document.getElementById("shopStars");
 
   const draw = document.getElementById("colorLayer");
-  const dctx = draw.getContext("2d");
+  const dctx = draw ? draw.getContext("2d") : null;
   const previewLayer = document.getElementById("previewLayer");
-  const pctx = previewLayer.getContext("2d");
+  const pctx = previewLayer ? previewLayer.getContext("2d") : null;
   const lineArtImg = document.getElementById("lineArtImg");
 
   const eraserBtn = document.getElementById("eraser");
   const clearBtn = document.getElementById("clear");
   const undoBtn = document.getElementById("undo");
   const pal = document.getElementById("palette");
+  const backToLibraryBtn = document.getElementById("backToLibrary");
+  const pageTitle = document.getElementById("pageTitle");
 
   let currentColor = COLORS[0];
   let currentLineWidth = 22;
@@ -114,11 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = null;
 
   function saveHistory() {
+    if (!draw) return;
     history.push(draw.toDataURL("image/png"));
     if (history.length > 20) history.shift();
   }
 
   function restoreHistory() {
+    if (!draw || !dctx) return;
     const last = history.pop();
     if (!last) return;
 
@@ -135,14 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
     undoBtn.onclick = restoreHistory;
   }
 
-    const backToLibraryBtn = document.getElementById("backToLibrary");
-  if (backToLibraryBtn) {
-    backToLibraryBtn.onclick = showLibrary;
-  }
-
   function updateStars() {
     if (!starsEl) return;
-    const progress = getProgress();
+    const progress = typeof getProgress === "function" ? getProgress() : { stars: 0 };
     starsEl.textContent = progress.stars || 0;
   }
 
@@ -159,12 +131,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildGrid() {
-    const progress = getProgress();
+    if (!grid) return;
+
+    const progress = typeof getProgress === "function" ? getProgress() : { stars: 0 };
+    const stars = progress.stars || 0;
+
     grid.innerHTML = "";
 
-    const ownedCount = PAGES.filter(page => isPurchased(page.id)).length;
     if (emptyState) {
-      emptyState.style.display = ownedCount ? "none" : "block";
+      emptyState.style.display = "none";
     }
 
     PAGES.forEach(page => {
@@ -172,33 +147,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const card = document.createElement("div");
       card.className = "card";
-      card.innerHTML = `
-        <img src="${page.img}" alt="${page.name}">
-        <div>${page.name}</div>
-      `;
+
+      const img = document.createElement("img");
+      img.src = page.img;
+      img.alt = page.name;
+
+      const title = document.createElement("div");
+      title.textContent = page.name;
 
       const badge = document.createElement("div");
       badge.className = "card-badge";
+      badge.textContent = purchased ? "⭐ Owned" : `⭐ ${page.cost}`;
+
+      card.appendChild(img);
+      card.appendChild(title);
+      card.appendChild(badge);
 
       if (purchased) {
-        badge.textContent = "⭐ Owned";
-        card.appendChild(badge);
-
         card.onclick = () => openPage(page);
       } else {
-        badge.textContent = `⭐ ${page.cost}`;
-        card.appendChild(badge);
-
         const unlockBtn = document.createElement("button");
         unlockBtn.className = "btn-soft";
         unlockBtn.style.marginTop = "8px";
 
-        if (progress.stars >= page.cost) {
+        if (stars >= page.cost) {
           unlockBtn.textContent = `Unlock ⭐ ${page.cost}`;
           unlockBtn.onclick = (e) => {
             e.stopPropagation();
 
-            const ok = buyShopItem(page.id);
+            const ok = typeof buyShopItem === "function" ? buyShopItem(page.id) : false;
             if (!ok) {
               alert("Not enough stars yet ⭐");
               return;
@@ -208,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             buildGrid();
           };
         } else {
-          const need = page.cost - progress.stars;
+          const need = page.cost - stars;
           unlockBtn.textContent = `Need ${need} ⭐`;
           unlockBtn.disabled = true;
           unlockBtn.style.opacity = "0.65";
@@ -224,7 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setEraser(on) {
     erasing = on;
-    eraserBtn.classList.toggle("selected", erasing);
+    if (eraserBtn) {
+      eraserBtn.classList.toggle("selected", erasing);
+    }
   }
 
   function selectSwatch(buttonEl) {
@@ -238,10 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openPage(page) {
+    if (!libraryView || !colorView || !lineArtImg || !draw || !dctx) return;
+
     currentPage = page;
+    history = [];
+
     libraryView.classList.add("hidden");
     colorView.classList.remove("hidden");
-    document.getElementById("pageTitle").textContent = page.name;
+
+    if (pageTitle) {
+      pageTitle.textContent = page.name;
+    }
 
     lineArtImg.src = page.img;
     dctx.clearRect(0, 0, draw.width, draw.height);
@@ -257,6 +243,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showLibrary() {
+    if (!libraryView || !colorView || !lineArtImg || !draw || !dctx) return;
+
     if (currentPage) saveDrawing(currentPage.id, draw);
 
     colorView.classList.add("hidden");
@@ -266,25 +254,32 @@ document.addEventListener("DOMContentLoaded", () => {
     lineArtImg.removeAttribute("src");
     setEraser(false);
     currentPage = null;
+    history = [];
 
     updateStars();
     buildGrid();
   }
 
-  COLORS.forEach((hex, idx) => {
-    const b = document.createElement("button");
-    b.className = "swatch";
-    b.style.background = hex;
-    b.style.boxShadow = "0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 3px rgba(255,255,255,0.22)";
-    b.onclick = () => {
-      currentColor = hex;
-      setEraser(false);
-      selectSwatch(b);
-    };
-    pal.appendChild(b);
+  if (backToLibraryBtn) {
+    backToLibraryBtn.onclick = showLibrary;
+  }
 
-    if (idx === 0) firstSwatchBtn = b;
-  });
+  if (pal) {
+    COLORS.forEach((hex, idx) => {
+      const b = document.createElement("button");
+      b.className = "swatch";
+      b.style.background = hex;
+      b.style.boxShadow = "0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 3px rgba(255,255,255,0.22)";
+      b.onclick = () => {
+        currentColor = hex;
+        setEraser(false);
+        selectSwatch(b);
+      };
+      pal.appendChild(b);
+
+      if (idx === 0) firstSwatchBtn = b;
+    });
+  }
 
   selectSwatch(firstSwatchBtn);
 
@@ -314,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function start(e) {
+    if (!draw) return;
     e.preventDefault();
     saveHistory();
     drawing = true;
@@ -321,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function move(e) {
-    if (!drawing) return;
+    if (!drawing || !dctx) return;
     e.preventDefault();
 
     const [x, y] = xy(e);
@@ -343,19 +339,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function end() {
-    if (drawing && currentPage) saveDrawing(currentPage.id, draw);
+    if (drawing && currentPage && draw) {
+      saveDrawing(currentPage.id, draw);
+    }
     drawing = false;
   }
 
-  draw.addEventListener("mousedown", start);
-  draw.addEventListener("mousemove", move);
-  draw.addEventListener("mouseup", end);
-  draw.addEventListener("mouseleave", end);
+  if (draw) {
+    draw.addEventListener("mousedown", start);
+    draw.addEventListener("mousemove", move);
+    draw.addEventListener("mouseup", end);
+    draw.addEventListener("mouseleave", end);
 
-  draw.addEventListener("touchstart", start, { passive: false });
-  draw.addEventListener("touchmove", move, { passive: false });
-  draw.addEventListener("touchend", end);
-  draw.addEventListener("touchcancel", end);
+    draw.addEventListener("touchstart", start, { passive: false });
+    draw.addEventListener("touchmove", move, { passive: false });
+    draw.addEventListener("touchend", end);
+    draw.addEventListener("touchcancel", end);
+  }
 
   if (eraserBtn) {
     eraserBtn.onclick = () => {
@@ -366,6 +366,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (clearBtn) {
     clearBtn.onclick = () => {
+      if (!draw || !dctx) return;
+
       dctx.clearRect(0, 0, draw.width, draw.height);
       dctx.globalCompositeOperation = "source-over";
       setEraser(false);
@@ -373,14 +375,20 @@ document.addEventListener("DOMContentLoaded", () => {
       currentLineWidth = 22;
       selectSwatch(firstSwatchBtn);
       selectSizeButton(document.querySelector('.sizeBtn[data-size="22"]'));
+      history = [];
 
       if (currentPage) saveDrawing(currentPage.id, draw);
     };
   }
 
-  lineArtImg.onerror = () => {
-    console.error("Failed to load full-size coloring image:", lineArtImg.src);
-  };
+  if (lineArtImg) {
+    lineArtImg.onerror = () => {
+      console.error("Failed to load full-size coloring image:", lineArtImg.src);
+    };
+  }
+
+  if (libraryView) libraryView.classList.remove("hidden");
+  if (colorView) colorView.classList.add("hidden");
 
   updateStars();
   buildGrid();
