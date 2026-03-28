@@ -327,13 +327,15 @@ document.addEventListener("DOMContentLoaded", () => {
     dctx.lineCap = "round";
     dctx.lineJoin = "round";
     dctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
-    dctx.strokeStyle = erasing ? "rgba(0,0,0,1)" : currentColor;
+    dctx.globalAlpha = erasing ? 1 : 0.15;
+    dctx.strokeStyle = currentColor;
 
     dctx.beginPath();
     dctx.moveTo(lastX, lastY);
     dctx.lineTo(x, y);
     dctx.stroke();
     dctx.restore();
+    dctx.globalAlpha = 2;
 
     [lastX, lastY] = [x, y];
   }

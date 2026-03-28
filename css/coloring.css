@@ -94,13 +94,15 @@
   height:100%;
 }
 
-#colorLayer{
+#lineArtImg{
   z-index:1;
+  pointer-events:none;
 }
 
-#lineArtImg{
+#colorLayer{
   z-index:2;
-  pointer-events:none;
+  touch-action:none;
+  background:transparent;
 }
 
 #previewLayer{
@@ -115,8 +117,8 @@
   margin-top:16px;
 }
 
-#draw{
-  z-index:3;
+#colorLayer{
+  z-index:2;
   touch-action:none;
   background:transparent;
 }
